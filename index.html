@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المتجر الموحد</title>
+    <!-- استدعاء Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- استدعاء خطوط جوجل (Tajawal) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- استدعاء أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f3f4f6; }
+        .app-card { transition: all 0.3s ease; }
+        .app-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- الشريط العلوي (Navbar) -->
+    <header class="bg-slate-800 text-white shadow-md z-10 flex justify-between items-center px-6 py-3">
+        <div class="flex items-center gap-4">
+            <!-- زر العودة للرئيسية (يظهر داخل التطبيقات فقط) -->
+            <button id="homeBtn" class="hidden hover:text-gray-300" onclick="showHub()">
+                <i class="fa-solid fa-table-cells-large text-xl"></i>
+            </button>
+            <h1 id="pageTitle" class="text-xl font-bold">لوحة التطبيقات</h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="relative hidden md:block">
+                <input type="text" placeholder="بحث عن سيريال، فاتورة..." class="rounded-full pl-4 pr-10 py-1 text-gray-800 focus:outline-none w-64">
+                <i class="fa-solid fa-magnifying-glass absolute right-3 top-2 text-gray-500"></i>
+            </div>
+            <button class="relative hover:text-gray-300">
+                <i class="fa-solid fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- القائمة الجانبية (Sidebar) - مخفية في الرئيسية -->
+        <aside id="sidebar" class="bg-white w-64 shadow-lg hidden flex-col transition-all duration-300">
+            <nav class="flex-col p-4 gap-2 flex" id="sidebarMenu">
+                <!-- يتم تعبئة القائمة بناءً على التطبيق المفتوح -->
+            </nav>
+        </aside>
+
+        <!-- مساحة العمل المركزية -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            
+            <!-- شاشة التطبيقات (Hub) -->
+            <div id="hubView" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <!-- تطبيق نقطة البيع -->
+                <div onclick="openApp('pos', 'نقطة البيع')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-blue-500">
+                    <i class="fa-solid fa-cash-register text-4xl text-blue-500"></i>
+                    <h2 class="font-bold text-gray-700">نقطة البيع (POS)</h2>
+                </div>
+                <!-- تطبيق المخازن -->
+                <div onclick="openApp('inventory', 'المخازن والباركود')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-green-500">
+                    <i class="fa-solid fa-boxes-stacked text-4xl text-green-500"></i>
+                    <h2 class="font-bold text-gray-700">المخازن والباركود</h2>
+                </div>
+                <!-- تطبيق الصيانة -->
+                <div onclick="openApp('maintenance', 'مركز الصيانة')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-orange-500">
+                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-orange-500"></i>
+                    <h2 class="font-bold text-gray-700">مركز الصيانة</h2>
+                </div>
+                <!-- تطبيق الأقساط -->
+                <div onclick="openApp('installments', 'إدارة الأقساط')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-purple-500">
+                    <i class="fa-solid fa-file-invoice-dollar text-4xl text-purple-500"></i>
+                    <h2 class="font-bold text-gray-700">إدارة الأقساط</h2>
+                </div>
+            </div>
+
+            <!-- شاشة عرض التطبيق (Workspace) -->
+            <div id="appView" class="hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 id="currentAppTitle" class="text-2xl font-bold mb-4 text-gray-800">جاري التحميل...</h2>
+                    <p class="text-gray-600 mb-6">هذه مساحة العمل الخاصة بالتطبيق. سيتم ربطها لاحقاً بالبيانات الحية.</p>
+                    
+                    <!-- مثال توضيحي لجدول بيانات داخل مساحة العمل -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700">
+                                    <th class="p-3 border-b">رقم العملية</th>
+                                    <th class="p-3 border-b">البيان</th>
+                                    <th class="p-3 border-b">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 border-b">#10024</td>
+                                    <td class="p-3 border-b">إصلاح شاشة الهاتف</td>
+                                    <td class="p-3 border-b"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">قيد الفحص</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // سكربت للتحكم في التنقل بين شاشة البداية والتطبيقات
+        const hubView = document.getElementById('hubView');
+        const appView = document.getElementById('appView');
+        const sidebar = document.getElementById('sidebar');
+        const homeBtn = document.getElementById('homeBtn');
+        const pageTitle = document.getElementById('pageTitle');
+        const currentAppTitle = document.getElementById('currentAppTitle');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+
+        // القوائم الجانبية لكل تطبيق
+        const appMenus = {
+            'pos': ['<a href="#" class="p-2 bg-blue-50 text-blue-700 rounded font-bold">جلسة بيع جديدة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">المبيعات اليومية</a>'],
+            'inventory': ['<a href="#" class="p-2 bg-green-50 text-green-700 rounded font-bold">طباعة باركود</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">جرد الأجهزة</a>'],
+            'maintenance': ['<a href="#" class="p-2 bg-orange-50 text-orange-700 rounded font-bold">تذكرة صيانة جديدة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">أجهزة قيد العمل</a>'],
+            'installments': ['<a href="#" class="p-2 bg-purple-50 text-purple-700 rounded font-bold">الأقساط المستحقة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">عقود جديدة</a>']
+        };
+
+        function openApp(appId, title) {
+            hubView.classList.add('hidden');
+            appView.classList.remove('hidden');
+            sidebar.classList.remove('hidden');
+            homeBtn.classList.remove('hidden');
+            
+            pageTitle.innerText = title;
+            currentAppTitle.innerText = "مساحة عمل: " + title;
+            
+            // تحديث القائمة الجانبية بناءً على التطبيق
+            sidebarMenu.innerHTML = appMenus[appId].join('');
+        }
+
+        function showHub() {
+            hubView.classList.remove('hidden');
+            appView.classList.add('hidden');
+            sidebar.classList.add('hidden');
+            homeBtn.classList.add('hidden');
+            
+            pageTitle.innerText = 'لوحة التطبيقات';
+        }
+    </script>
+</body>
+</html>
