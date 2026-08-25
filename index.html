@@ -1,151 +1,156 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة المتجر الموحد</title>
-    <!-- استدعاء Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- استدعاء خطوط جوجل (Tajawal) -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- استدعاء أيقونات FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        body { font-family: 'Tajawal', sans-serif; background-color: #f3f4f6; }
-        .app-card { transition: all 0.3s ease; }
-        .app-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ماي فون | إدارة المتجر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#714B67;      /* لون أودو البنفسجي */
+  --secondary:#017E84;
+  --bg:#F1F1F1;
+  --card:#FFFFFF;
+  --text:#374151;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
+body{background:var(--bg);color:var(--text)}
+
+/* ===== الشريط العلوي ===== */
+.navbar{
+  background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 24px;box-shadow:0 2px 6px rgba(0,0,0,.2);
+  position:sticky;top:0;z-index:100;
+}
+.navbar .logo{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}
+.navbar .logo span{background:#fff;color:var(--primary);border-radius:8px;padding:2px 10px}
+
+/* ===== قائمة التطبيقات (بأسلوب أودو) ===== */
+.apps-grid{display:flex;gap:20px;padding:30px;flex-wrap:wrap;justify-content:center}
+.app-card{
+  background:var(--card);border-radius:12px;width:160px;height:160px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;cursor:pointer;text-decoration:none;color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);transition:.25s;
+}
+.app-card:hover{transform:translateY(-5px);box-shadow:0 8px 20px rgba(113,75,103,.3)}
+.app-icon{
+  width:64px;height:64px;border-radius:14px;background:var(--secondary);
+  display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;
+}
+.app-card.disabled{opacity:.4;cursor:not-allowed}
+
+/* ===== شاشة تطبيق الصيانة ===== */
+#maintenanceApp{display:none;padding:24px;max-width:1200px;margin:auto}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.btn{
+  background:var(--primary);color:#fff;border:none;border-radius:8px;
+  padding:10px 22px;font-size:15px;cursor:pointer;font-family:'Cairo';
+}
+.btn:hover{opacity:.9}
+table{width:100%;background:#fff;border-radius:10px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);border-collapse:collapse}
+th{background:var(--primary);color:#fff;padding:12px;font-size:14px}
+td{padding:11px;border-bottom:1px solid #eee;text-align:center;font-size:14px}
+tr:hover td{background:#faf7fb}
+.badge{padding:4px 12px;border-radius:20px;font-size:12px;color:#fff}
+.b-new{background:#017E84}.b-progress{background:#f59e0b}.b-done{background:#16a34a}
+
+/* نموذج الإضافة */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;
+  align-items:center;justify-content:center;z-index:200}
+.modal{background:#fff;border-radius:12px;padding:28px;width:420px;max-width:95%}
+.modal h3{margin-bottom:18px;color:var(--primary)}
+.modal input,.modal select,.modal textarea{
+  width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;
+  border-radius:8px;font-family:'Cairo'}
+</style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body>
 
-    <!-- الشريط العلوي (Navbar) -->
-    <header class="bg-slate-800 text-white shadow-md z-10 flex justify-between items-center px-6 py-3">
-        <div class="flex items-center gap-4">
-            <!-- زر العودة للرئيسية (يظهر داخل التطبيقات فقط) -->
-            <button id="homeBtn" class="hidden hover:text-gray-300" onclick="showHub()">
-                <i class="fa-solid fa-table-cells-large text-xl"></i>
-            </button>
-            <h1 id="pageTitle" class="text-xl font-bold">لوحة التطبيقات</h1>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <div class="relative hidden md:block">
-                <input type="text" placeholder="بحث عن سيريال، فاتورة..." class="rounded-full pl-4 pr-10 py-1 text-gray-800 focus:outline-none w-64">
-                <i class="fa-solid fa-magnifying-glass absolute right-3 top-2 text-gray-500"></i>
-            </div>
-            <button class="relative hover:text-gray-300">
-                <i class="fa-solid fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
-            </button>
-        </div>
-    </header>
+<nav class="navbar">
+  <div class="logo">📱 <span>My Phone</span> | لوحة الإدارة</div>
+  <button class="btn" onclick="showApps()">🏠 الرئيسية</button>
+</nav>
 
-    <div class="flex flex-1 overflow-hidden">
-        <!-- القائمة الجانبية (Sidebar) - مخفية في الرئيسية -->
-        <aside id="sidebar" class="bg-white w-64 shadow-lg hidden flex-col transition-all duration-300">
-            <nav class="flex-col p-4 gap-2 flex" id="sidebarMenu">
-                <!-- يتم تعبئة القائمة بناءً على التطبيق المفتوح -->
-            </nav>
-        </aside>
+<!-- قائمة التطبيقات -->
+<div class="apps-grid" id="appsHome">
+  <a class="app-card" onclick="openMaintenance()">
+    <div class="app-icon">🔧</div><div>الصيانة</div>
+  </a>
+  <div class="app-card disabled"><div class="app-icon" style="background:#94a3b8">📦</div><div>المخزون</div></div>
+  <div class="app-card disabled"><div class="app-icon" style="background:#94a3b8">🧾</div><div>الفواتير</div></div>
+  <div class="app-card disabled"><div class="app-icon" style="background:#94a3b8">👥</div><div>العملاء</div></div>
+</div>
 
-        <!-- مساحة العمل المركزية -->
-        <main class="flex-1 p-6 overflow-y-auto">
-            
-            <!-- شاشة التطبيقات (Hub) -->
-            <div id="hubView" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                <!-- تطبيق نقطة البيع -->
-                <div onclick="openApp('pos', 'نقطة البيع')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-blue-500">
-                    <i class="fa-solid fa-cash-register text-4xl text-blue-500"></i>
-                    <h2 class="font-bold text-gray-700">نقطة البيع (POS)</h2>
-                </div>
-                <!-- تطبيق المخازن -->
-                <div onclick="openApp('inventory', 'المخازن والباركود')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-green-500">
-                    <i class="fa-solid fa-boxes-stacked text-4xl text-green-500"></i>
-                    <h2 class="font-bold text-gray-700">المخازن والباركود</h2>
-                </div>
-                <!-- تطبيق الصيانة -->
-                <div onclick="openApp('maintenance', 'مركز الصيانة')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-orange-500">
-                    <i class="fa-solid fa-screwdriver-wrench text-4xl text-orange-500"></i>
-                    <h2 class="font-bold text-gray-700">مركز الصيانة</h2>
-                </div>
-                <!-- تطبيق الأقساط -->
-                <div onclick="openApp('installments', 'إدارة الأقساط')" class="app-card bg-white p-6 rounded-xl shadow cursor-pointer flex flex-col items-center justify-center gap-3 text-center border-t-4 border-purple-500">
-                    <i class="fa-solid fa-file-invoice-dollar text-4xl text-purple-500"></i>
-                    <h2 class="font-bold text-gray-700">إدارة الأقساط</h2>
-                </div>
-            </div>
+<!-- تطبيق الصيانة -->
+<div id="maintenanceApp">
+  <div class="page-header">
+    <h2>🔧 أوامر الصيانة</h2>
+    <button class="btn" onclick="openModal()">➕ أمر صيانة جديد</button>
+  </div>
+  <table>
+    <thead><tr>
+      <th>#</th><th>اسم العميل</th><th>الجهاز</th><th>العطل</th>
+      <th>التكلفة</th><th>الحالة</th><th>التاريخ</th>
+    </tr></thead>
+    <tbody id="ordersBody"><tr><td colspan="7">⏳ جارٍ التحميل...</td></tr></tbody>
+  </table>
+</div>
 
-            <!-- شاشة عرض التطبيق (Workspace) -->
-            <div id="appView" class="hidden">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 id="currentAppTitle" class="text-2xl font-bold mb-4 text-gray-800">جاري التحميل...</h2>
-                    <p class="text-gray-600 mb-6">هذه مساحة العمل الخاصة بالتطبيق. سيتم ربطها لاحقاً بالبيانات الحية.</p>
-                    
-                    <!-- مثال توضيحي لجدول بيانات داخل مساحة العمل -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-700">
-                                    <th class="p-3 border-b">رقم العملية</th>
-                                    <th class="p-3 border-b">البيان</th>
-                                    <th class="p-3 border-b">الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="p-3 border-b">#10024</td>
-                                    <td class="p-3 border-b">إصلاح شاشة الهاتف</td>
-                                    <td class="p-3 border-b"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">قيد الفحص</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<!-- نافذة الإضافة -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>أمر صيانة جديد</h3>
+    <input id="fName" placeholder="اسم العميل">
+    <input id="fDevice" placeholder="نوع الجهاز (مثال: iPhone 13)">
+    <textarea id="fIssue" placeholder="وصف العطل"></textarea>
+    <input id="fCost" type="number" placeholder="التكلفة">
+    <select id="fStatus">
+      <option value="جديد">جديد</option>
+      <option value="قيد التنفيذ">قيد التنفيذ</option>
+      <option value="مكتمل">مكتمل</option>
+    </select>
+    <button class="btn" style="width:100%" onclick="saveOrder()">💾 حفظ في Google Sheets</button>
+  </div>
+</div>
 
-        </main>
-    </div>
+<script>
+const API_URL = "ضع_رابط_Web_App_هنا"; // رابط Google Apps Script
 
-    <script>
-        // سكربت للتحكم في التنقل بين شاشة البداية والتطبيقات
-        const hubView = document.getElementById('hubView');
-        const appView = document.getElementById('appView');
-        const sidebar = document.getElementById('sidebar');
-        const homeBtn = document.getElementById('homeBtn');
-        const pageTitle = document.getElementById('pageTitle');
-        const currentAppTitle = document.getElementById('currentAppTitle');
-        const sidebarMenu = document.getElementById('sidebarMenu');
+function openMaintenance(){
+  document.getElementById('appsHome').style.display='none';
+  document.getElementById('maintenanceApp').style.display='block';
+  loadOrders();
+}
+function showApps(){
+  document.getElementById('appsHome').style.display='flex';
+  document.getElementById('maintenanceApp').style.display='none';
+}
+function openModal(){document.getElementById('modalBg').style.display='flex'}
 
-        // القوائم الجانبية لكل تطبيق
-        const appMenus = {
-            'pos': ['<a href="#" class="p-2 bg-blue-50 text-blue-700 rounded font-bold">جلسة بيع جديدة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">المبيعات اليومية</a>'],
-            'inventory': ['<a href="#" class="p-2 bg-green-50 text-green-700 rounded font-bold">طباعة باركود</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">جرد الأجهزة</a>'],
-            'maintenance': ['<a href="#" class="p-2 bg-orange-50 text-orange-700 rounded font-bold">تذكرة صيانة جديدة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">أجهزة قيد العمل</a>'],
-            'installments': ['<a href="#" class="p-2 bg-purple-50 text-purple-700 rounded font-bold">الأقساط المستحقة</a>', '<a href="#" class="p-2 hover:bg-gray-100 rounded">عقود جديدة</a>']
-        };
+async function loadOrders(){
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  const badge = s => s==='مكتمل'?'b-done':s==='قيد التنفيذ'?'b-progress':'b-new';
+  document.getElementById('ordersBody').innerHTML = data.map(o=>`
+    <tr>
+      <td>o.id</td><td>{o.id}</td><td>o.id</td><td>{o.name}</td><td>${o.device}</td>
+      <td>o.issue</td><td>{o.issue}</td><td>o.issue</td><td>{o.cost} ج.م</td>
+      <td><span class="badge badge(o.status)">{badge(o.status)}">badge(o.status)">{o.status}</span></td>
+      <td>${o.date}</td>
+    </tr>`).join('');
+}
 
-        function openApp(appId, title) {
-            hubView.classList.add('hidden');
-            appView.classList.remove('hidden');
-            sidebar.classList.remove('hidden');
-            homeBtn.classList.remove('hidden');
-            
-            pageTitle.innerText = title;
-            currentAppTitle.innerText = "مساحة عمل: " + title;
-            
-            // تحديث القائمة الجانبية بناءً على التطبيق
-            sidebarMenu.innerHTML = appMenus[appId].join('');
-        }
-
-        function showHub() {
-            hubView.classList.remove('hidden');
-            appView.classList.add('hidden');
-            sidebar.classList.add('hidden');
-            homeBtn.classList.add('hidden');
-            
-            pageTitle.innerText = 'لوحة التطبيقات';
-        }
-    </script>
+async function saveOrder(){
+  const order = {
+    name: fName.value, device: fDevice.value,
+    issue: fIssue.value, cost: fCost.value, status: fStatus.value
+  };
+  await fetch(API_URL,{method:'POST',body:JSON.stringify(order)});
+  modalBg.style.display='none'; loadOrders();
+}
+</script>
 </body>
 </html>
