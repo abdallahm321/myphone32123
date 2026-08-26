@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ماي فون | إدارة الصيانة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--primary:#714B67; --secondary:#017E84; --bg:#f3f4f6; --text:#1f2937; --border:#e5e7eb;}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
+  body{background:var(--bg);color:var(--text)}
+  .navbar{background:var(--primary);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;}
+  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;text-decoration:none}
+  .btn:hover{opacity:0.9}
+  .container{padding:20px;max-width:1400px;margin:auto;}
+  .toolbar{display:flex;gap:15px;margin-bottom:20px;background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+  .search-box{flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none}
+  .table-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  th{background:#f9fafb;padding:12px;text-align:right;font-size:14px;color:#6b7280;border-bottom:1px solid var(--border)}
+  td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;}
+  tr:hover{background:#f3f4f6;cursor:pointer}
+  .badge{padding:4px 10px;border-radius:20px;font-size:12px;color:#fff;font-weight:600}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
+  .modal{background:#fff;width:500px;max-width:95%;border-radius:12px;padding:24px;max-height:90vh;overflow-y:auto;}
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block;font-size:13px;margin-bottom:4px;color:#4b5563}
+  .form-group input, .form-group select, .form-group textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;}
+  .timeline{margin-top:20px;padding-right:15px;border-right:2px solid var(--secondary);}
+  .timeline-item{position:relative;margin-bottom:15px;padding-right:20px;}
+  .timeline-item::before{content:"";position:absolute;right:-21px;top:5px;width:12px;height:12px;background:var(--secondary);border-radius:50%;border:3px solid #fff}
+  .tl-date{font-size:12px;color:#6b7280}
+  .tl-status{font-weight:bold;color:var(--primary)}
+  .tl-note{font-size:13px;background:#f9fafb;padding:8px;border-radius:6px;margin-top:5px;}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div style="font-size:20px;font-weight:bold">🔧 قسم الصيانة</div>
+  <a href="index.html" class="btn" style="background:#4b5563">🏠 الرئيسية</a>
+</nav>
+
+<div class="container">
+  <div class="toolbar">
+    <button class="btn" style="background:var(--secondary)" onclick="openNewOrderModal()">➕ استلام جهاز جديد</button>
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 استعلام (رقم الطلب، اسم العميل، الهاتف، المهندس)..." onkeyup="filterTable()">
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>الجهاز</th><th>المهندس</th><th>التكلفة</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+      <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- نافذة استلام جهاز -->
+<div class="modal-overlay" id="newOrderModal">
+  <div class="modal">
+    <h3 style="margin-bottom:15px;color:var(--primary)">📝 كرت استلام جديد</h3>
+    <div class="form-group"><input id="nName" placeholder="اسم العميل"></div>
+    <div class="form-group"><input id="nPhone" placeholder="رقم الهاتف"></div>
+    <div class="form-group"><input id="nDevice" placeholder="نوع الجهاز (مثال: iPhone 13)"></div>
+    <div class="form-group"><textarea id="nIssue" placeholder="وصف العطل" rows="2"></textarea></div>
+    <div class="form-group"><input id="nTech" placeholder="اسم المهندس (مثال: م. أحمد)"></div>
+    <div class="form-group"><input id="nCost" type="number" placeholder="التكلفة التقديرية"></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn" style="flex:1" id="btnSaveNew" onclick="saveNewOrder()">💾 حفظ</button>
+      <button class="btn" style="flex:1;background:#ef4444" onclick="closeModals()">❌ إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة التفاصيل والتحديث -->
+<div class="modal-overlay" id="detailsModal">
+  <div class="modal" style="width:600px">
+    <h3 style="margin-bottom:15px;color:var(--primary)">🔍 ملف الجهاز</h3>
+    <div id="orderDetailsHeader" style="background:#f3f4f6;padding:10px;border-radius:6px;margin-bottom:15px;font-size:14px;line-height:1.6"></div>
+
+    <div style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff">
+      <h4 style="margin-bottom:10px;color:var(--secondary)">➕ إضافة تحديث للحالة</h4>
+      <input type="hidden" id="uId">
+      <div class="form-group">
+        <select id="uStatus">
+          <option value="Pending">قيد الانتظار (Pending)</option>
+          <option value="In_Progress">جاري العمل (In Progress)</option>
+          <option value="Waiting_Parts">بانتظار قطع غيار (Waiting Parts)</option>
+          <option value="Completed">مكتمل ✅ (Completed)</option>
+          <option value="Delivered">تم التسليم 🤝 (Delivered)</option>
+          <option value="Cancelled">ملغي ❌ (Cancelled)</option>
+        </select>
+      </div>
+      <div class="form-group"><input id="uTech" placeholder="المهندس"></div>
+      <div class="form-group"><input id="uCost" type="number" placeholder="تعديل التكلفة 최종"></div>
+      <div class="form-group"><textarea id="uNote" placeholder="ملاحظات الصيانة..." rows="2"></textarea></div>
+      <button class="btn" id="btnUpdate" style="width:100%" onclick="updateOrder()">🚀 حفظ التحديث</button>
+    </div>
+
+    <h4 style="margin-top:20px">📜 السجل التاريخي</h4>
+    <div class="timeline" id="orderTimeline"></div>
+    <button class="btn" style="width:100%;margin-top:15px;background:#9ca3af" onclick="closeModals()">رجوع</button>
+  </div>
+</div>
+
+<script>
+// الرابط الخاص بك الذي تم استخراجه من Google Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbzxVaO3z7NpkuJtDpp20Wgy3JmDNnEKS-VwjozGIDSvQusQqxaPSqqlNb3AlZPbLsTzOQ/exec"; 
+let allOrders = [];
+
+window.onload = loadOrders;
+
+// الترجمة المرئية للحالات الإنجليزية
+const statusMap = {
+  'Pending': { text: 'انتظار', color: '#f59e0b' },
+  'In_Progress': { text: 'جاري العمل', color: '#3b82f6' },
+  'Waiting_Parts': { text: 'بانتظار قطع', color: '#ef4444' },
+  'Completed': { text: 'مكتمل', color: '#10b981' },
+  'Delivered': { text: 'تم التسليم', color: '#059669' },
+  'Cancelled': { text: 'ملغي', color: '#6b7280' }
+};
+
+async function loadOrders(){
+  try {
+    const res = await fetch(API_URL + "?module=maintenance");
+    allOrders = await res.json();
+    renderTable(allOrders);
+  } catch(e) {
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">خطأ في الاتصال بقاعدة البيانات.</td></tr>`;
+  }
+}
+
+function renderTable(data){
+  const tbody = document.getElementById('tableBody');
+  if(!data || data.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">لا توجد طلبات.</td></tr>`; return;
+  }
+  tbody.innerHTML = data.map(o => {
+    const st = statusMap[o.status] || { text: o.status, color: '#333' };
+    return `<tr onclick="openDetails('${o.id}')">
+      <td style="font-weight:bold;color:var(--secondary)">${o.id}</td>
+      <td>${o.name}</td><td dir="ltr">${o.phone}</td><td>${o.device}</td>
+      <td>${o.tech}</td><td style="font-weight:bold">${o.cost||0}</td>
+      <td><span class="badge" style="background:${st.color}">${st.text}</span></td>
+      <td style="font-size:12px;color:#888">${o.date.split(' / ')[0]}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(){
+  const term = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allOrders.filter(o => 
+    o.id.toLowerCase().includes(term) || o.name.toLowerCase().includes(term) || o.phone.includes(term)
+  );
+  renderTable(filtered);
+}
+
+function openNewOrderModal(){ document.getElementById('newOrderModal').style.display='flex'; }
+function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
+
+async function saveNewOrder(){
+  if(!nName.value || !nDevice.value) return alert("يرجى إدخال اسم العميل ونوع الجهاز!");
+  const btn = document.getElementById('btnSaveNew'); btn.innerText = "⏳ جاري الحفظ...";
+  
+  const payload = {
+    module: "maintenance", action: "create",
+    data: { name: nName.value, phone: nPhone.value, device: nDevice.value, issue: nIssue.value, tech: nTech.value, cost: nCost.value }
+  };
+
+  await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify(payload) });
+  
+  closeModals(); btn.innerText = "💾 حفظ";
+  ['nName','nPhone','nDevice','nIssue','nTech','nCost'].forEach(id=>document.getElementById(id).value='');
+  loadOrders();
+}
+
+function openDetails(id){
+  const order = allOrders.find(o => o.id === id);
+  if(!order) return;
+
+  document.getElementById('uId').value = order.id;
+  document.getElementById('uCost').value = order.cost;
+  document.getElementById('uTech').value = order.tech;
+  document.getElementById('uStatus').value = order.status;
+  document.getElementById('uNote').value = '';
+
+  document.getElementById('orderDetailsHeader').innerHTML = `
+    <strong>العميل:</strong> ${order.name} (${order.phone})<br>
+    <strong>الجهاز:</strong> ${order.device} | <strong>العطل:</strong> ${order.issue}
+  `;
+
+  document.getElementById('orderTimeline').innerHTML = order.history.map(h => {
+    const st = statusMap[h.status]?.text || h.status;
+    return `<div class="timeline-item">
+      <div class="tl-date">${h.date}</div>
+      <div class="tl-status">${st}</div>
+      ${h.note ? `<div class="tl-note">${h.note}</div>` : ''}
+      <div style="font-size:11px;color:#888;margin-top:4px">م. ${h.user}</div>
+    </div>`;
+  }).reverse().join('');
+
+  document.getElementById('detailsModal').style.display='flex';
+}
+
+async function updateOrder(){
+  const btn = document.getElementById('btnUpdate'); btn.innerText = "⏳ جاري التحديث...";
+  const payload = {
+    module: "maintenance", action: "update",
+    data: {
+      id: document.getElementById('uId').value, status: document.getElementById('uStatus').value,
+      note: document.getElementById('uNote').value, cost: document.getElementById('uCost').value,
+      tech: document.getElementById('uTech').value
+    }
+  };
+
+  await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify(payload) });
+  closeModals(); btn.innerText = "🚀 حفظ التحديث"; loadOrders();
+}
+</script>
+</body>
+</html>
