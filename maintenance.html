@@ -1,393 +1,236 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة الصيانة V4 | ERP</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ماي فون | إدارة الصيانة V6</title>
 <style>
-  :root{--primary:#714B67; --secondary:#017E84; --bg:#f3f4f6; --text:#1f2937; --border:#e5e7eb; --danger:#ef4444; --warn:#f59e0b;}
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
-  body{background:var(--bg);color:var(--text)}
-
-  .navbar{background:var(--primary);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1)}
-  .navbar .logo-area { display: flex; align-items: center; gap: 10px; }
-  .navbar img { max-height: 40px; border-radius: 8px; background: #fff; padding: 2px; display: none; }
-  .sys-info{font-size:12px;opacity:0.9;margin-top:2px;}
-  
-  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-  .btn:hover:not(:disabled){opacity:0.9;transform:translateY(-1px)}
-  .btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none}
-  .btn-green{background:#10b981} .btn-red{background:var(--danger)} .btn-sec{background:var(--secondary)} .btn-gray{background:#4b5563} .btn-warn{background:var(--warn)} .btn-blue{background:#3b82f6}
-  .btn-sm{font-size:11px;padding:6px 10px}
-
-  .container{padding:20px;max-width:1500px;margin:auto;}
-
-  /* الإحصائيات والأدوات */
-  .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
-  .stat-card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.1);text-align:center;border-top:3px solid var(--primary)}
-  .stat-card .num{font-size:22px;font-weight:bold;color:var(--primary)}
-  .stat-card .lbl{font-size:11px;color:#6b7280;margin-top:4px}
-  
-  .toolbar{display:flex;gap:12px;margin-bottom:20px;background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);align-items:center;flex-wrap:wrap}
-  .search-box{flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none}
-  select.filter-select{padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;}
-  .last-sync{font-size:11px;color:#9ca3af;margin-right:auto}
-
-  /* الجدول */
-  .table-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;min-width:1000px}
-  th{background:#f9fafb;padding:12px;text-align:right;font-size:12px;color:#6b7280;border-bottom:1px solid var(--border)}
-  td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;}
-  tr:hover{background:#f3f4f6;cursor:pointer}
-  .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:#fff;font-weight:600;white-space:nowrap}
-  .pay-badge{padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}
-
-  /* النوافذ المنبثقة */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);padding:20px}
-  .modal{background:#fff;width:650px;max-width:95%;border-radius:12px;padding:24px;max-height:92vh;overflow-y:auto;position:relative}
-  .modal.wide{width:800px}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .form-group.full{grid-column:1 / -1}
-  .form-group label{display:block;font-size:12px;margin-bottom:4px;color:#4b5563;font-weight:bold}
-  .form-group input, .form-group select, .form-group textarea{width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;outline:none;font-size:13px}
-  .form-group input:focus, .form-group select:focus{border-color:var(--secondary)}
-
-  /* نظام الطباعة A4 والفواتير */
-  #printArea{display:none;}
-  @media print {
-    body * { visibility: hidden; }
-    #printArea, #printArea * { visibility: visible; }
-    #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block; padding: 20px; background: #fff; }
-    .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-    .print-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
-    .print-footer { text-align: center; margin-top: 30px; font-size: 12px; border-top: 1px solid #000; padding-top: 10px; }
-    .sign-box{margin-top:40px;display:flex;justify-content:space-between}
-    .sign-box div{width:45%;border-top:1px solid #000;text-align:center;padding-top:5px;font-size:12px}
-  }
+:root{--p:#714B67;--bg:#f5f6f8;--card:#fff;--line:#e5e7eb;--text:#20252b;--muted:#6b7280;--ok:#059669;--warn:#d97706;--bad:#dc2626;--info:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Tahoma,sans-serif}
+button,input,select,textarea{font:inherit}.top{background:var(--p);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;gap:15px;align-items:center;position:sticky;top:0;z-index:20}.brand{font-weight:800;font-size:20px}.sub{font-size:11px;opacity:.8;margin-top:3px}
+.wrap{max-width:1700px;margin:auto;padding:16px}.toolbar,.panel,.modalBox{background:var(--card);border:1px solid var(--line);border-radius:10px}.toolbar{padding:11px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar input{flex:1;min-width:260px}
+.btn{border:0;border-radius:7px;padding:9px 13px;color:#fff;background:var(--p);cursor:pointer;font-weight:700}.btn.ok{background:var(--ok)}.btn.warn{background:var(--warn)}.btn.bad{background:var(--bad)}.btn.info{background:var(--info)}.btn.gray{background:#4b5563}.btn:disabled{opacity:.5}
+.cards{display:grid;grid-template-columns:repeat(8,minmax(115px,1fr));gap:9px;margin:12px 0}.card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px}.num{font-size:22px;font-weight:800;color:var(--p)}.lbl{font-size:11px;color:var(--muted);margin-top:3px}
+.panel{overflow:hidden}.panelHead{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.tableWrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px 8px;border-bottom:1px solid #edf0f2;text-align:right;white-space:nowrap}th{background:#fafafa;color:#4b5563;position:sticky;top:0}.click{cursor:pointer}.click:hover{background:#faf7f9}
+.badge{display:inline-block;padding:4px 7px;border-radius:999px;color:#fff;font-size:10px}.small{font-size:11px;color:var(--muted)}.danger{color:var(--bad);font-weight:700}.success{color:var(--ok);font-weight:700}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto}.modalBox{max-width:1100px;margin:auto;padding:16px}.modalBox.wide{max-width:1450px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.field{display:flex;flex-direction:column;gap:4px}.field label{font-size:11px;color:var(--muted)}.field input,.field select,.field textarea{border:1px solid #d7dbe0;border-radius:7px;padding:8px;background:#fff}.field textarea{min-height:70px;resize:vertical}.span2{grid-column:span 2}.span4{grid-column:1/-1}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.tabs{display:flex;gap:5px;margin:12px 0}.tab{padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer}.tab.active{background:var(--p);color:#fff}.timeline{border-right:3px solid #ddd;padding-right:12px}.event{padding:9px;border-bottom:1px solid #eee}.section{margin-top:14px;border:1px solid var(--line);border-radius:9px;padding:11px}.section h3{margin:0 0 9px;font-size:14px}.toast{position:fixed;bottom:20px;left:20px;background:#111;color:#fff;padding:11px 15px;border-radius:8px;display:none;z-index:100}.statusbar{font-size:11px;color:var(--muted)}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.span2{grid-column:auto}}
 </style>
 </head>
 <body>
+<div class="top">
+  <div><div class="brand" id="company">ماي فون</div><div class="sub">نظام إدارة الصيانة الخارجية والحوكمة التشغيلية V6</div></div>
+  <div class="statusbar" style="color:#fff" id="sync">جاري الاتصال...</div>
+</div>
 
-<nav class="navbar">
-  <div class="logo-area">
-    <img id="navLogo" src="" alt="Logo">
-    <div>
-      <div style="font-size:20px;font-weight:bold">🔧 إدارة الصيانة</div>
-      <div class="sys-info" id="sysInfo">جاري تحميل بيانات الشركة...</div>
-    </div>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn btn-blue" onclick="openModal('settingsModal')">⚙️ الإعدادات</button>
-    <button class="btn btn-sec" onclick="openTechManager()">👨‍🔧 المهندسين</button>
-    <button class="btn btn-warn" onclick="openTrash()">🗑️ المهملات</button>
-    <button class="btn btn-gray" onclick="loadData()">🔄 تحديث</button>
-    <a href="index.html" class="btn" style="background:#1f2937">🏠 الرئيسية</a>
-  </div>
-</nav>
-
-<div class="container">
-  <div class="stats-bar" id="statsBar"></div>
+<div class="wrap">
   <div class="toolbar">
-    <button class="btn btn-sec" onclick="openModal('newOrderModal')">➕ استلام جهاز جديد</button>
-    <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث برقم الطلب، العميل، الهاتف، السيريال..." onkeyup="filterTable()">
-    <select class="filter-select" id="statusFilter" onchange="filterTable()">
-      <option value="">كل الحالات</option>
-      <option value="Pending">قيد الانتظار</option>
-      <option value="In_Progress">جاري العمل</option>
-      <option value="Waiting_Parts">بانتظار قطع</option>
-      <option value="Completed">مكتمل</option>
-      <option value="Delivered">تم التسليم</option>
-    </select>
-    <span class="last-sync" id="lastSync"></span>
+    <input id="search" placeholder="بحث: رقم الخدمة، العميل، الهاتف، IMEI، الموديل، السيريال..." oninput="filterServices()">
+    <select id="statusFilter" onchange="filterServices()"><option value="">كل الحالات</option></select>
+    <select id="priorityFilter" onchange="filterServices()"><option value="">كل الأولويات</option></select>
+    <button class="btn ok" onclick="openNew()">+ استلام جهاز</button>
+    <button class="btn info" onclick="loadAll(true)">تحديث</button>
+    <button class="btn gray" onclick="openTechs()">المهندسون</button>
+    <button class="btn" onclick="openSettings()">الإعدادات</button>
   </div>
 
-  <div class="table-card">
-    <table>
-      <thead><tr>
-        <th>الطلب</th><th>العميل</th><th>الهاتف</th><th>الجهاز</th><th>السيريال</th>
-        <th>المهندس</th><th>المتبقي</th><th>السداد</th><th>الحالة</th><th>التاريخ</th>
-      </tr></thead>
-      <tbody id="tableBody"><tr><td colspan="10" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
-    </table>
-  </div>
-</div>
+  <div class="cards" id="cards"></div>
 
-<!-- نافذة استلام جهاز -->
-<div class="modal-overlay" id="newOrderModal">
-  <div class="modal wide">
-    <h3 style="margin-bottom:15px;color:var(--primary)">📝 كرت استلام جهاز جديد</h3>
-    <div class="form-grid">
-      <div class="form-group"><label>رقم الهاتف *</label><input id="nPhone" type="tel"></div>
-      <div class="form-group"><label>اسم العميل *</label><input id="nName"></div>
-      <div class="form-group"><label>نوع الجهاز *</label><input id="nDevice"></div>
-      <div class="form-group"><label>سيريال / IMEI</label><input id="nSerial"></div>
-      <div class="form-group full"><label>الملحقات وحالة الاستلام</label><input id="nCondition" placeholder="بدون شاحن، خدوش بالشاشة..."></div>
-      <div class="form-group full"><label>شكوى العميل / وصف العطل *</label><textarea id="nIssue" rows="2"></textarea></div>
-      <div class="form-group"><label>المهندس المختص</label><select id="nTech"></select></div>
-      <div class="form-group"><label>التكلفة المبدئية (ج.م)</label><input id="nCost" type="number"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn btn-sec" style="flex:1" id="btnSaveNew" onclick="saveNewOrder()">💾 حفظ واستلام</button>
-      <button class="btn btn-gray" onclick="closeModals()">إلغاء</button>
+  <div class="panel">
+    <div class="panelHead"><b>أوامر الصيانة</b><span class="small" id="countLabel"></span></div>
+    <div class="tableWrap">
+      <table><thead><tr>
+        <th>رقم الخدمة</th><th>العميل</th><th>الجهاز</th><th>IMEI / Serial</th>
+        <th>المهندس</th><th>الحالة</th><th>الأولوية</th><th>الموعد</th><th>المتبقي</th><th>آخر إجراء</th>
+      </tr></thead><tbody id="servicesBody"></tbody></table>
     </div>
   </div>
 </div>
 
-<!-- نافذة تحديث الطلب -->
-<div class="modal-overlay" id="detailsModal">
-  <div class="modal wide">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
-      <h3 style="color:var(--primary)">🔍 ملف الجهاز</h3>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-sec btn-sm" onclick="printSticker()">🖨️ طباعة استيكر</button>
-        <button class="btn btn-green btn-sm" onclick="printReceipt('receipt')">🖨️ إيصال استلام</button>
-        <button class="btn btn-gray btn-sm" onclick="printReceipt('invoice')">🖨️ فاتورة</button>
-      </div>
-    </div>
-    <div id="orderDetailsHeader" style="background:#f9fafb;padding:12px;border-radius:6px;margin-bottom:15px;font-size:13px;border:1px solid var(--border)"></div>
-
-    <div class="form-grid" style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff">
-      <input type="hidden" id="uId">
-      <div class="form-group"><label>تحديث الحالة</label>
-        <select id="uStatus">
-          <option value="Pending">قيد الانتظار</option><option value="In_Progress">جاري العمل</option>
-          <option value="Waiting_Parts">بانتظار قطع غيار</option><option value="Completed">مكتمل ✅</option>
-          <option value="Delivered">تم التسليم 🤝</option><option value="Cancelled">ملغي ❌</option>
-        </select>
-      </div>
-      <div class="form-group"><label>المهندس</label><select id="uTech"></select></div>
-      <div class="form-group"><label>التكلفة النهائية</label><input id="uFinalCost" type="number" oninput="recalcDue()"></div>
-      <div class="form-group"><label>المبلغ المدفوع</label><input id="uPaid" type="number" oninput="recalcDue()"></div>
-      <div class="form-group full" style="display:flex;justify-content:space-between;background:#fef2f2;padding:10px;border-radius:6px;font-weight:bold">
-        <span>المتبقي: <span id="dueDisplay" style="color:var(--danger)">0</span> ج.م</span>
-        <span id="payStatusDisplay" class="pay-badge">-</span>
-      </div>
-      <div class="form-group full"><label>ملاحظات</label><textarea id="uNote" rows="2"></textarea></div>
-      <div class="form-group full" style="display:flex;gap:10px;margin-top:10px">
-        <button class="btn" id="btnUpdate" style="flex:2" onclick="updateOrder()">🚀 حفظ التحديث</button>
-        <button class="btn btn-red" onclick="deleteOrder()">🗑️ نقل للمهملات</button>
-      </div>
-    </div>
-    <div style="margin-top:15px;text-align:center"><button class="btn btn-gray" style="width:100%" onclick="closeModals()">إغلاق</button></div>
+<div class="modal" id="newModal">
+ <div class="modalBox wide">
+  <h2>استلام جهاز جديد</h2>
+  <div class="grid">
+   <div class="field"><label>اسم العميل *</label><input id="nName"></div>
+   <div class="field"><label>الهاتف *</label><input id="nPhone"></div>
+   <div class="field"><label>هاتف بديل</label><input id="nAltPhone"></div>
+   <div class="field"><label>العنوان</label><input id="nAddress"></div>
+   <div class="field"><label>نوع الجهاز *</label><select id="nType"><option>هاتف</option><option>تابلت</option><option>لابتوب</option><option>ساعة</option><option>جهاز آخر</option></select></div>
+   <div class="field"><label>الشركة *</label><input id="nBrand"></div>
+   <div class="field"><label>الموديل *</label><input id="nModel"></div>
+   <div class="field"><label>اللون</label><input id="nColor"></div>
+   <div class="field"><label>IMEI 1</label><input id="nImei1"></div>
+   <div class="field"><label>IMEI 2</label><input id="nImei2"></div>
+   <div class="field"><label>Serial</label><input id="nSerial"></div>
+   <div class="field"><label>السعة</label><input id="nStorage"></div>
+   <div class="field"><label>الأولوية</label><select id="nPriority"><option value="NORMAL">عادية</option><option value="HIGH">عالية</option><option value="URGENT">عاجلة</option><option value="LOW">منخفضة</option></select></div>
+   <div class="field"><label>الموعد المتوقع</label><input type="date" id="nExpected"></div>
+   <div class="field span2"><label>الملحقات</label><input id="nAccessories"></div>
+   <div class="field span2"><label>حالة الجهاز عند الاستلام</label><textarea id="nCondition"></textarea></div>
+   <div class="field span4"><label>شكوى العميل / العطل *</label><textarea id="nComplaint"></textarea></div>
   </div>
+  <div class="actions"><button class="btn ok" id="saveNew" onclick="saveNew()">حفظ الاستلام</button><button class="btn gray" onclick="closeModals()">إلغاء</button></div>
+ </div>
 </div>
 
-<!-- نافذة إدارة الإعدادات -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <h3 style="margin-bottom:15px;color:var(--primary)">⚙️ إعدادات النظام</h3>
-    <div class="form-group"><label>اسم الشركة/المتجر</label><input id="setCompanyName"></div>
-    <div class="form-group"><label>رابط اللوجو (Logo URL - اختياري)</label><input id="setLogoUrl" placeholder="https://..."></div>
-    <div class="form-group"><label>اسم مستخدم النظام (أنت)</label><input id="setUserName"></div>
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn btn-sec" style="flex:1" onclick="saveSettings()">💾 حفظ الإعدادات</button>
-      <button class="btn btn-gray" onclick="closeModals()">إلغاء</button>
-    </div>
+<div class="modal" id="detailModal">
+ <div class="modalBox wide">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2 id="detailTitle"></h2><button class="btn gray" onclick="closeModals()">إغلاق</button></div>
+  <div id="detailSummary"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="showDetailTab('overview',this)">الملخص</button>
+    <button class="tab" onclick="showDetailTab('workflow',this)">دورة العمل</button>
+    <button class="tab" onclick="showDetailTab('actions',this)">الإجراءات</button>
+    <button class="tab" onclick="showDetailTab('quality',this)">الجودة والضمان</button>
   </div>
+  <div id="detailOverview"></div><div id="detailWorkflow" style="display:none"></div><div id="detailActions" style="display:none"></div><div id="detailQuality" style="display:none"></div>
+ </div>
 </div>
 
-<!-- نافذة إدارة المهندسين -->
-<div class="modal-overlay" id="techManagerModal">
-  <div class="modal wide">
-    <h3 style="margin-bottom:15px;color:var(--primary)">👨‍🔧 إدارة المهندسين</h3>
-    <div style="display:flex;gap:10px;margin-bottom:15px">
-      <input id="newTechName" placeholder="اسم المهندس" class="search-box" style="flex:2">
-      <input id="newTechPhone" placeholder="رقم الهاتف" class="search-box" style="flex:2">
-      <button class="btn btn-sec" onclick="addTechnician()">➕ إضافة</button>
-    </div>
-    <table style="min-width:100%">
-      <thead><tr><th>الاسم</th><th>الهاتف</th><th>الحالة</th><th>إجراء</th></tr></thead>
-      <tbody id="techTableBody"></tbody>
-    </table>
-    <div style="margin-top:15px;text-align:center"><button class="btn btn-gray" style="width:100%" onclick="closeModals()">إغلاق</button></div>
-  </div>
-</div>
+<div class="modal" id="techModal"><div class="modalBox">
+ <h2>المهندسون الخارجيون</h2>
+ <div class="grid"><div class="field"><label>الاسم</label><input id="tName"></div><div class="field"><label>الهاتف</label><input id="tPhone"></div><div class="field"><label>واتساب</label><input id="tWhats"></div><div class="field"><label>التخصص</label><input id="tSpec"></div></div>
+ <div class="actions"><button class="btn ok" onclick="addTech()">إضافة</button><button class="btn gray" onclick="closeModals()">إغلاق</button></div>
+ <div class="tableWrap" style="margin-top:12px"><table><thead><tr><th>المهندس</th><th>الهاتف</th><th>واتساب</th><th>الحالة</th><th></th></tr></thead><tbody id="techBody"></tbody></table></div>
+</div></div>
 
-<!-- نافذة سلة المهملات -->
-<div class="modal-overlay" id="trashModal">
-  <div class="modal"><h3 style="color:var(--warn)">🗑️ سلة المهملات</h3><div id="trashList"></div><button class="btn btn-gray" style="width:100%;margin-top:15px" onclick="closeModals()">إغلاق</button></div>
-</div>
+<div class="modal" id="settingsModal"><div class="modalBox">
+ <h2>الإعدادات</h2><div class="grid">
+ <div class="field"><label>اسم المنشأة</label><input id="sCompany"></div>
+ <div class="field"><label>المستخدم الحالي</label><input id="sUser"></div>
+ <div class="field"><label>العملة</label><input id="sCurrency"></div>
+ <div class="field"><label>ضمان افتراضي بالأيام</label><input id="sWarranty" type="number"></div>
+ </div><div class="actions"><button class="btn ok" onclick="saveSettings()">حفظ</button><button class="btn gray" onclick="closeModals()">إغلاق</button></div>
+</div></div>
 
-<div id="printArea"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ⚠️ ضع رابط الـ API الجديد هنا بعد عمل New Deployment
-const API_URL = "https://script.google.com/macros/s/AKfycbybKUpxcKKTNU5Fa8DLUOmuA4UVc5OQ4OFeYPhlCpQvcU4mMI_RQ7BMcr_4oCssZlj5vQ/exec";
-let allOrders=[], sysSettings={}, techList=[], currentOrder=null;
+const API_URL='PUT_YOUR_WEB_APP_URL_HERE';
+const STATUS_NAMES={
+RECEIVED:'تم الاستلام',INITIAL_INSPECTION:'فحص أولي',DIAGNOSIS:'تشخيص',WAITING_APPROVAL:'انتظار موافقة',
+APPROVED:'تمت الموافقة',DISPATCHED:'تم الإرسال للمهندس',TECHNICIAN_RECEIVED:'استلمه المهندس',
+IN_REPAIR:'قيد الإصلاح',WAITING_PARTS:'انتظار قطعة',READY_FROM_TECH:'تم الإصلاح',
+RETURNED_TO_STORE:'عاد للمحل',QUALITY_CHECK:'فحص الجودة',READY_FOR_DELIVERY:'جاهز للتسليم',
+CUSTOMER_NOTIFIED:'تم إخطار العميل',DELIVERED:'تم التسليم',WARRANTY:'ضمان',
+CANCELLED:'ملغي',REJECTED:'مرفوض',UNREPAIRABLE:'غير قابل للإصلاح'};
+const STATUS_COLOR={RECEIVED:'#6b7280',INITIAL_INSPECTION:'#2563eb',DIAGNOSIS:'#2563eb',WAITING_APPROVAL:'#d97706',APPROVED:'#059669',DISPATCHED:'#714B67',TECHNICIAN_RECEIVED:'#714B67',IN_REPAIR:'#714B67',WAITING_PARTS:'#d97706',READY_FROM_TECH:'#059669',RETURNED_TO_STORE:'#2563eb',QUALITY_CHECK:'#2563eb',READY_FOR_DELIVERY:'#059669',CUSTOMER_NOTIFIED:'#059669',DELIVERED:'#059669',WARRANTY:'#d97706',CANCELLED:'#dc2626',REJECTED:'#dc2626',UNREPAIRABLE:'#dc2626'};
+const PRIORITY_NAMES={LOW:'منخفضة',NORMAL:'عادية',HIGH:'عالية',URGENT:'عاجلة'};
+let settings={},services=[],current=null,detail=null,techs=[];
 
-const statusMap = {'Pending':{text:'انتظار',color:'#f59e0b'},'In_Progress':{text:'جاري العمل',color:'#3b82f6'},'Waiting_Parts':{text:'بانتظار قطع',color:'#ef4444'},'Completed':{text:'مكتمل',color:'#10b981'},'Delivered':{text:'تم التسليم',color:'#059669'},'Cancelled':{text:'ملغي',color:'#6b7280'}};
-const payStatusMap = {'N/A':{text:'-',color:'#9ca3af'},'Unpaid':{text:'غير مدفوع',color:'#ef4444'},'Partial':{text:'جزئي',color:'#f59e0b'},'Paid_Full':{text:'مدفوع',color:'#10b981'}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const money=n=>Number(n||0).toLocaleString('ar-EG');
+function toast(m){$('toast').textContent=m;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2500)}
+function closeModals(){document.querySelectorAll('.modal').forEach(x=>x.style.display='none')}
+async function api(path='',opts){if(API_URL.includes('PUT_YOUR'))throw Error('ضع رابط Web App في API_URL أولاً');const r=await fetch(API_URL+path,opts);const j=await r.json();if(j?.ok===false)throw Error(j.error||'خطأ');return j}
+function post(payload){return api('',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,user:settings.User_Name||'System'})})}
 
-window.onload = loadData;
+window.onload=async()=>{fillFilters();await loadAll(false);setInterval(()=>loadAll(false),30000)}
 
-async function loadData(){
-  document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" style="text-align:center">⏳ جاري التحميل...</td></tr>`;
-  try {
-    const resSet = await fetch(API_URL + "?module=settings"); sysSettings = await resSet.json();
-    document.getElementById('sysInfo').innerText = `🏢 ${sysSettings.Company_Name} | 👤 ${sysSettings.User_Name}`;
-    if(sysSettings.Logo_URL){ document.getElementById('navLogo').src = sysSettings.Logo_URL; document.getElementById('navLogo').style.display = 'block'; }
-    
-    // تعبئة نافذة الإعدادات
-    document.getElementById('setCompanyName').value = sysSettings.Company_Name || '';
-    document.getElementById('setLogoUrl').value = sysSettings.Logo_URL || '';
-    document.getElementById('setUserName').value = sysSettings.User_Name || '';
-
-    const resTech = await fetch(API_URL + "?module=technicians"); techList = await resTech.json();
-    populateTechSelects();
-
-    const resOrd = await fetch(API_URL + "?module=maintenance"); allOrders = await resOrd.json();
-    renderTable(allOrders);
-    renderStats(allOrders);
-    document.getElementById('lastSync').innerText = '🕒 آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG');
-  } catch(e) { alert("حدث خطأ في الاتصال بالخادم."); }
+async function loadAll(){
+ try{
+  const [s,o,d,t]=await Promise.all([api('?module=settings'),api('?module=maintenance&limit=1000'),api('?module=dashboard'),api('?module=technicians')]);
+  settings=s;services=o;techs=t;
+  $('company').textContent=settings.Company_Name||'ماي فون';
+  $('sync').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG');
+  renderDashboard(d);fillFilters();renderServices(services);
+ }catch(e){toast(e.message)}
 }
+function fillFilters(){
+ $('statusFilter').innerHTML='<option value="">كل الحالات</option>'+Object.entries(STATUS_NAMES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+ $('priorityFilter').innerHTML='<option value="">كل الأولويات</option>'+Object.entries(PRIORITY_NAMES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+}
+function renderDashboard(d){
+ const cards=[
+ ['إجمالي الطلبات',d.total],['النشطة',d.active],['طلبات اليوم',d.today],['مع المهندسين',d.with_technicians],
+ ['انتظار موافقة',d.waiting_approval],['انتظار قطع',d.waiting_parts],['جاهز للتسليم',d.ready_for_delivery],['متأخر',d.overdue]
+ ];
+ $('cards').innerHTML=cards.map(x=>`<div class="card"><div class="num">${x[1]}</div><div class="lbl">${x[0]}</div></div>`).join('');
+}
+function filterServices(){
+ const q=$('search').value.toLowerCase(),s=$('statusFilter').value,p=$('priorityFilter').value;
+ renderServices(services.filter(x=>(!q||[x.id,x.name,x.phone,x.brand,x.model,x.imei1,x.imei2,x.serial,x.complaint].some(v=>String(v||'').toLowerCase().includes(q)))&&(!s||x.status===s)&&(!p||x.priority===p)));
+}
+function renderServices(data){
+ $('countLabel').textContent=data.length+' سجل';
+ $('servicesBody').innerHTML=data.length?data.map(x=>{
+  const overdue=x.expected_delivery&&String(x.expected_delivery).slice(0,10)<new Date().toISOString().slice(0,10)&&!['DELIVERED','CANCELLED'].includes(x.status);
+  const tech=techs.find(t=>t.id===x.technician_id);
+  return `<tr class="click" onclick="openDetail('${esc(x.id)}')"><td><b>${esc(x.id)}</b></td><td>${esc(x.name)}<br><span class="small">${esc(x.phone)}</span></td><td>${esc([x.brand,x.model].filter(Boolean).join(' '))}<br><span class="small">${esc(x.device_type)}</span></td><td dir="ltr">${esc(x.imei1||x.serial||'-')}</td><td>${esc(tech?.name||'-')}</td><td><span class="badge" style="background:${STATUS_COLOR[x.status]||'#6b7280'}">${STATUS_NAMES[x.status]||x.status}</span></td><td>${esc(PRIORITY_NAMES[x.priority]||x.priority)}</td><td class="${overdue?'danger':''}">${esc(String(x.expected_delivery||'-').slice(0,10))}</td><td class="${x.due>0?'danger':'success'}">${money(x.due)}</td><td>${esc(String(x.last_action||'').slice(0,16))}</td></tr>`
+ }).join(''):'<tr><td colspan="10" style="text-align:center;padding:25px">لا توجد بيانات</td></tr>';
+}
+function openNew(){$('newModal').style.display='block'}
+async function saveNew(){
+ const d={
+ name:$('nName').value.trim(),phone:$('nPhone').value.trim(),alt_phone:$('nAltPhone').value.trim(),address:$('nAddress').value.trim(),
+ device_type:$('nType').value,brand:$('nBrand').value.trim(),model:$('nModel').value.trim(),color:$('nColor').value.trim(),
+ imei1:$('nImei1').value.trim(),imei2:$('nImei2').value.trim(),serial:$('nSerial').value.trim(),storage:$('nStorage').value.trim(),
+ priority:$('nPriority').value,expected_delivery:$('nExpected').value,accessories:$('nAccessories').value.trim(),condition:$('nCondition').value.trim(),complaint:$('nComplaint').value.trim()
+ };
+ if(!d.name||!d.phone||!d.brand||!d.model||!d.complaint)return toast('أكمل الحقول الإلزامية');
+ try{const r=await post({module:'maintenance',action:'create',data:d});toast('تم إنشاء '+r.id);closeModals();clearNew();await loadAll(true);openDetail(r.id)}catch(e){toast(e.message)}
+}
+function clearNew(){['nName','nPhone','nAltPhone','nAddress','nBrand','nModel','nColor','nImei1','nImei2','nSerial','nStorage','nExpected','nAccessories','nCondition','nComplaint'].forEach(x=>$(x).value='')}
 
-function populateTechSelects(){
-  const activeTechs = techList.filter(t => t.active === 'Yes');
-  const opts = activeTechs.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
-  document.getElementById('nTech').innerHTML = opts; document.getElementById('uTech').innerHTML = opts;
+async function openDetail(id){
+ try{detail=await api('?module=service&id='+encodeURIComponent(id));current=detail.service;$('detailTitle').textContent=current.id+' — '+current.name;renderDetail();$('detailModal').style.display='block'}catch(e){toast(e.message)}
 }
-
-function renderStats(data){
-  const counts = { Pending:0, In_Progress:0, Waiting_Parts:0, Completed:0, Delivered:0 };
-  data.forEach(o => { if(counts[o.status] !== undefined) counts[o.status]++; });
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-card"><div class="num">${counts.Pending + counts.In_Progress + counts.Waiting_Parts}</div><div class="lbl">قيد التنفيذ</div></div>
-    <div class="stat-card"><div class="num">${counts.Completed}</div><div class="lbl">جاهز للاستلام</div></div>
-    <div class="stat-card"><div class="num">${counts.Delivered}</div><div class="lbl">تم التسليم</div></div>
-  `;
+function showDetailTab(tab,btn){
+ ['overview','workflow','actions','quality'].forEach(x=>$(x==='overview'?'detailOverview':x==='workflow'?'detailWorkflow':x==='actions'?'detailActions':'detailQuality').style.display=x===tab?'block':'none');
+ document.querySelectorAll('#detailModal .tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
 }
-
-function renderTable(data){
-  const tbody = document.getElementById('tableBody');
-  if(!data.length){ tbody.innerHTML = `<tr><td colspan="10" style="text-align:center">لا توجد بيانات.</td></tr>`; return; }
-  tbody.innerHTML = data.map(o => {
-    const st = statusMap[o.status], pst = payStatusMap[o.payment_status];
-    return `<tr onclick="openDetails('${o.id}')">
-      <td style="font-weight:bold;color:var(--secondary)">${o.id}</td>
-      <td>${o.name}</td><td dir="ltr">${o.phone}</td><td>${o.device}</td><td style="font-size:11px">${o.serial||'-'}</td>
-      <td>${o.tech}</td><td style="color:${o.due>0?'var(--danger)':'#10b981'};font-weight:bold">${o.due||0}</td>
-      <td><span class="pay-badge" style="background:${pst.color}22;color:${pst.color}">${pst.text}</span></td>
-      <td><span class="badge" style="background:${st.color}">${st.text}</span></td><td style="font-size:11px">${o.date.split(' / ')[0]}</td>
-    </tr>`;
-  }).join('');
+function summaryCard(label,value){return `<div class="card"><div class="small">${label}</div><b>${esc(value)}</b></div>`}
+function renderDetail(){
+ const c=current, tech=techs.find(t=>t.id===c.technician_id);
+ $('detailSummary').innerHTML=`<div class="cards" style="grid-template-columns:repeat(6,1fr)">
+ ${summaryCard('الحالة',STATUS_NAMES[c.status]||c.status)}${summaryCard('الأولوية',PRIORITY_NAMES[c.priority]||c.priority)}
+ ${summaryCard('المهندس',tech?.name||'-')}${summaryCard('الموعد',String(c.expected_delivery||'-').slice(0,10))}
+ ${summaryCard('التكلفة',money(c.final_cost))}${summaryCard('المستحق',money(c.due))}
+ </div>`;
+ $('detailOverview').innerHTML=`
+ <div class="grid">
+  <div class="section span2"><h3>العميل</h3>${esc(c.name)}<br>${esc(c.phone)}<br>${esc(c.customer_id)}</div>
+  <div class="section span2"><h3>الجهاز</h3>${esc([c.device_type,c.brand,c.model].join(' '))}<br>IMEI: ${esc(c.imei1||'-')}<br>Serial: ${esc(c.serial||'-')}</div>
+  <div class="section span4"><h3>شكوى العميل</h3>${esc(c.complaint||'-')}</div>
+  <div class="section span2"><h3>التشخيص الأولي</h3>${esc(c.initial_diagnosis||'-')}</div>
+  <div class="section span2"><h3>تشخيص المهندس</h3>${esc(c.technician_diagnosis||'-')}</div>
+ </div>`;
+ const hist=detail.history||[];
+ $('detailWorkflow').innerHTML='<div class="timeline">'+hist.slice().reverse().map(x=>`<div class="event"><b>${esc(STATUS_NAMES[x.To_Status]||x.To_Status)}</b><br><span class="small">${esc(x.Changed_At)} — ${esc(x.Changed_By)}</span><br>${esc(x.Reason||'')} ${esc(x.Notes||'')}</div>`).join('')+'</div>';
+ $('detailActions').innerHTML=`
+ <div class="section"><h3>تغيير الحالة</h3><div class="grid">
+ <div class="field"><label>الحالة الجديدة</label><select id="aStatus">${Object.entries(STATUS_NAMES).map(([k,v])=>`<option value="${k}" ${k===c.status?'selected':''}>${v}</option>`).join('')}</select></div>
+ <div class="field"><label>سبب التغيير</label><input id="aReason"></div><div class="field span2"><label>ملاحظات</label><input id="aNotes"></div></div>
+ <div class="actions"><button class="btn" onclick="changeStatus()">حفظ الحالة</button></div></div>
+ <div class="section"><h3>إرسال لمهندس</h3><div class="grid">
+ <div class="field"><label>المهندس</label><select id="dTech">${techs.filter(t=>t.active).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>
+ <div class="field"><label>موعد الرجوع</label><input type="date" id="dReturn"></div>
+ <div class="field"><label>التكلفة المتفق عليها</label><input id="dCost" type="number"></div>
+ <div class="field"><label>الوصف</label><input id="dProblem" value="${esc(c.complaint||'')}"></div></div>
+ <div class="actions"><button class="btn info" onclick="dispatch()">تسجيل الإرسال</button></div></div>
+ <div class="section"><h3>عرض سعر</h3><div class="grid">
+ <div class="field"><label>تكلفة قطع</label><input id="qParts" type="number"></div><div class="field"><label>أجور</label><input id="qLabor" type="number"></div><div class="field"><label>مدة الإصلاح</label><input id="qTime"></div><div class="field"><label>أيام الضمان</label><input id="qWarranty" type="number" value="${Number(settings.Warranty_Default_Days||30)}"></div>
+ <div class="field span4"><label>التشخيص</label><textarea id="qDiag"></textarea></div></div><div class="actions"><button class="btn warn" onclick="quotation()">إنشاء عرض سعر</button></div></div>
+ <div class="section"><h3>استلام من المهندس</h3><div class="grid"><div class="field"><label>التكلفة الفعلية</label><input id="rCost" type="number"></div><div class="field"><label>أيام الضمان</label><input id="rWarranty" type="number" value="${Number(settings.Warranty_Default_Days||30)}"></div><div class="field"><label>نتيجة الإصلاح</label><select id="rResult"><option>OK</option><option>PARTIAL</option><option>UNREPAIRABLE</option></select></div><div class="field"><label>حالة الجهاز</label><input id="rCondition"></div></div><div class="actions"><button class="btn ok" onclick="techReturn()">تسجيل الاستلام</button></div></div>`;
+ $('detailQuality').innerHTML=`
+ <div class="section"><h3>فحص الجودة</h3><div class="grid">${['power','charging','screen','touch','camera','audio','mic','network','wifi','bluetooth','biometric','software','physical'].map(x=>`<div class="field"><label>${x}</label><select id="qc_${x}"><option>OK</option><option>FAIL</option><option>N/A</option></select></div>`).join('')}</div><div class="actions"><button class="btn info" onclick="saveQC()">حفظ فحص الجودة</button></div></div>
+ <div class="section"><h3>تسليم للعميل</h3><div class="grid"><div class="field"><label>اسم المستلم</label><input id="delReceiver"></div><div class="field"><label>أيام الضمان</label><input id="delWarranty" type="number" value="${Number(settings.Warranty_Default_Days||30)}"></div><div class="field span2"><label>ملاحظات</label><input id="delNotes"></div></div><div class="actions"><button class="btn ok" onclick="deliver()">تسجيل التسليم وبدء الضمان</button></div></div>
+ <div class="section"><h3>الضمان</h3>${detail.warranty?`من ${esc(detail.warranty.Start_Date)} إلى ${esc(detail.warranty.End_Date)} — ${esc(detail.warranty.Status)}`:'لا يوجد ضمان بعد'}</div>`;
 }
-
-function filterTable(){
-  const term = document.getElementById('searchInput').value.toLowerCase(), statusVal = document.getElementById('statusFilter').value;
-  renderTable(allOrders.filter(o => (o.id.toLowerCase().includes(term) || o.name.toLowerCase().includes(term) || o.phone.includes(term)) && (!statusVal || o.status === statusVal)));
-}
-
-function openModal(id){ document.getElementById(id).style.display='flex'; }
-function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
-
-async function saveSettings(){
-  const payload = { module: 'settings', data: { Company_Name: document.getElementById('setCompanyName').value, Logo_URL: document.getElementById('setLogoUrl').value, User_Name: document.getElementById('setUserName').value }};
-  await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); closeModals(); loadData();
-}
-
-async function openTechManager(){
-  openModal('techManagerModal');
-  document.getElementById('techTableBody').innerHTML = techList.map(t => `
-    <tr><td>${t.name}</td><td>${t.phone}</td>
-    <td><span class="badge" style="background:${t.active==='Yes'?'#10b981':'#ef4444'}">${t.active==='Yes'?'نشط':'موقوف'}</span></td>
-    <td><button class="btn btn-sec btn-sm" onclick="toggleTech('${t.id}')">تبديل الحالة</button></td></tr>
-  `).join('');
-}
-async function addTechnician(){
-  const name = document.getElementById('newTechName').value, phone = document.getElementById('newTechPhone').value;
-  if(!name) return;
-  await fetch(API_URL, { method:'POST', body: JSON.stringify({module:'technicians', action:'add', data:{name, phone}}) });
-  document.getElementById('newTechName').value=''; document.getElementById('newTechPhone').value='';
-  const resTech = await fetch(API_URL + "?module=technicians"); techList = await resTech.json(); openTechManager(); populateTechSelects();
-}
-async function toggleTech(id){
-  await fetch(API_URL, { method:'POST', body: JSON.stringify({module:'technicians', action:'toggle', data:{id}}) });
-  const resTech = await fetch(API_URL + "?module=technicians"); techList = await resTech.json(); openTechManager(); populateTechSelects();
-}
-
-async function saveNewOrder(){
-  if(!nName.value || !nDevice.value || !nPhone.value) return alert("أكمل الحقول المطلوبة!");
-  document.getElementById('btnSaveNew').disabled = true;
-  await fetch(API_URL, { method: 'POST', body: JSON.stringify({module:"maintenance",action:"create",user:sysSettings.User_Name,data:{name:nName.value,phone:nPhone.value,device:nDevice.value,serial:nSerial.value,condition:nCondition.value,issue:nIssue.value,tech:nTech.value,initial_cost:nCost.value}}) });
-  closeModals(); document.getElementById('btnSaveNew').disabled = false;
-  ['nName','nPhone','nDevice','nSerial','nCondition','nIssue','nCost'].forEach(id=>document.getElementById(id).value=''); loadData();
-}
-
-function openDetails(id){
-  currentOrder = allOrders.find(o => o.id === id);
-  document.getElementById('uId').value = currentOrder.id; document.getElementById('uStatus').value = currentOrder.status; document.getElementById('uTech').value = currentOrder.tech; document.getElementById('uFinalCost').value = currentOrder.final_cost||''; document.getElementById('uPaid').value = currentOrder.paid||0;
-  recalcDue();
-  document.getElementById('orderDetailsHeader').innerHTML = `<strong>الطلب:</strong> ${currentOrder.id} | <strong>العميل:</strong> ${currentOrder.name} (${currentOrder.phone})<br><strong>الجهاز:</strong> ${currentOrder.device} | <strong>العطل:</strong> ${currentOrder.issue}`;
-  openModal('detailsModal');
-}
-
-function recalcDue(){
-  const net = (Number(document.getElementById('uFinalCost').value)||0), paid = (Number(document.getElementById('uPaid').value)||0), due = Math.max(net - paid, 0);
-  document.getElementById('dueDisplay').innerText = due;
-  const pst = payStatusMap[net<=0?'N/A':due<=0?'Paid_Full':paid>0?'Partial':'Unpaid'];
-  document.getElementById('payStatusDisplay').innerText = pst.text; document.getElementById('payStatusDisplay').style.color = pst.color;
-}
-
-async function updateOrder(){
-  document.getElementById('btnUpdate').disabled = true;
-  await fetch(API_URL, { method:'POST', body: JSON.stringify({module:"maintenance",action:"update",user:sysSettings.User_Name,data:{id:document.getElementById('uId').value,status:document.getElementById('uStatus').value,tech:document.getElementById('uTech').value,final_cost:document.getElementById('uFinalCost').value,discount:0,paid:document.getElementById('uPaid').value,note:document.getElementById('uNote').value}}) });
-  closeModals(); document.getElementById('btnUpdate').disabled = false; loadData();
-}
-async function deleteOrder(){
-  if(!confirm("نقل للمهملات؟")) return;
-  await fetch(API_URL, { method:'POST', body: JSON.stringify({module:"maintenance",action:"delete",data:{id:currentOrder.id}}) }); closeModals(); loadData();
-}
-
-async function openTrash(){
-  openModal('trashModal');
-  const res = await fetch(API_URL + "?module=trash"); const trashed = await res.json();
-  document.getElementById('trashList').innerHTML = trashed.length ? trashed.map(t => `<div style="padding:10px;border-bottom:1px solid #eee"><strong>${t.id}</strong> - ${t.name}<button class="btn btn-green btn-sm" style="float:left" onclick="restoreOrder('${t.id}')">استرجاع</button></div>`).join('') : 'فارغة';
-}
-async function restoreOrder(id){ await fetch(API_URL, { method:'POST', body: JSON.stringify({module:'maintenance', action:'restore', data:{id}}) }); openTrash(); loadData(); }
-
-// =======================================
-// نظام طباعة ملصق الباركود (Sticker)
-// =======================================
-function printSticker() {
-  if(!currentOrder) return;
-  const win = window.open('', '_blank', 'width=400,height=300');
-  win.document.write(`
-    <html><head><style>
-      @page { size: 4cm 2.5cm; margin: 0; }
-      body { font-family: 'Cairo', sans-serif; margin: 0; padding: 4px; text-align: center; font-size: 11px; font-weight: bold; line-height: 1.2; }
-      .company { font-size: 13px; margin-bottom: 2px; text-decoration: underline; }
-      .id-box { border: 2px solid #000; padding: 2px; margin: 3px 0; font-size: 14px; letter-spacing: 1px; }
-      .text-cut { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-    </style></head><body dir="rtl">
-      <div class="company">${sysSettings.Company_Name}</div>
-      <div class="text-cut">${currentOrder.name}</div>
-      <div class="id-box">${currentOrder.id}</div>
-      <div class="text-cut" style="font-size:10px">${currentOrder.device}</div>
-    </body></html>
-  `);
-  win.document.close(); win.focus();
-  setTimeout(() => { win.print(); win.close(); }, 500); // تأخير بسيط لضمان تحميل الخطوط
-}
-
-// طباعة الفواتير A4
-function printReceipt(type){
-  if(!currentOrder) return;
-  const printArea = document.getElementById('printArea');
-  const title = type === 'receipt' ? 'إيصال استلام' : 'فاتورة صيانة';
-  printArea.innerHTML = `
-    <div class="print-header"><h2>${sysSettings.Company_Name}</h2><h3>${title}</h3><p>رقم: ${currentOrder.id} | التاريخ: ${currentOrder.date.split(' / ')[0]}</p></div>
-    <div class="print-row"><span>العميل:</span><strong>${currentOrder.name}</strong></div>
-    <div class="print-row"><span>الهاتف:</span><span>${currentOrder.phone}</span></div>
-    <div class="print-row"><span>الجهاز:</span><span>${currentOrder.device}</span></div>
-    <div class="print-row"><span>العطل:</span><span>${currentOrder.issue}</span></div>
-    <div style="border-top:2px solid #000;margin:15px 0"></div>
-    <div class="print-row"><span>التكلفة/المبلغ:</span><span>${currentOrder.final_cost || currentOrder.initial_cost || 0} ج.م</span></div>
-    <div class="sign-box"><div>توقيع العميل</div><div>توقيع الموظف</div></div>
-  `;
-  window.print();
-}
+async function changeStatus(){try{await post({module:'maintenance',action:'status',data:{id:current.id,status:$('aStatus').value,reason:$('aReason').value,notes:$('aNotes').value}});toast('تم تغيير الحالة');await refreshDetail()}catch(e){toast(e.message)}}
+async function dispatch(){try{await post({module:'dispatch',action:'create',data:{service_id:current.id,technician_id:$('dTech').value,expected_return:$('dReturn').value,agreed_cost:$('dCost').value,problem_description:$('dProblem').value,accessories:current.accessories,device_condition:current.condition}});toast('تم تسجيل الإرسال');await refreshDetail()}catch(e){toast(e.message)}}
+async function quotation(){try{await post({module:'quotation',action:'create',data:{service_id:current.id,technician_id:current.technician_id,parts_cost:$('qParts').value,labor_cost:$('qLabor').value,expected_time:$('qTime').value,warranty_days:$('qWarranty').value,diagnosis:$('qDiag').value}});toast('تم إنشاء عرض السعر');await refreshDetail()}catch(e){toast(e.message)}}
+async function techReturn(){try{await post({module:'return',action:'create',data:{service_id:current.id,technician_id:current.technician_id,actual_cost:$('rCost').value,warranty_days:$('rWarranty').value,repair_result:$('rResult').value,device_condition:$('rCondition').value}});toast('تم استلام الجهاز من المهندس');await refreshDetail()}catch(e){toast(e.message)}}
+async function saveQC(){const d={service_id:current.id,result:'PASS',notes:''};['power','charging','screen','touch','camera','audio','mic','network','wifi','bluetooth','biometric','software','physical'].forEach(x=>d[x]=$('qc_'+x).value);if(Object.values(d).includes('FAIL'))d.result='FAIL';try{await post({module:'qc',action:'create',data:d});toast('تم تسجيل فحص الجودة');await refreshDetail()}catch(e){toast(e.message)}}
+async function deliver(){try{await post({module:'delivery',action:'create',data:{service_id:current.id,customer_id:current.customer_id,received_by:$('delReceiver').value,warranty_days:$('delWarranty').value,notes:$('delNotes').value,device_condition:current.condition,accessories:current.accessories}});toast('تم التسليم وبدء الضمان');await refreshDetail()}catch(e){toast(e.message)}}
+async function refreshDetail(){await loadAll(true);await openDetail(current.id)}
+function openTechs(){$('techModal').style.display='block';renderTechs()}
+function renderTechs(){$('techBody').innerHTML=techs.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.phone)}</td><td>${esc(t.whatsapp)}</td><td>${t.active?'<span class="badge" style="background:#059669">نشط</span>':'<span class="badge" style="background:#dc2626">موقوف</span>'}</td><td><button class="btn gray" onclick="toggleTech('${esc(t.id)}')">تبديل</button></td></tr>`).join('')}
+async function addTech(){const d={name:$('tName').value.trim(),phone:$('tPhone').value.trim(),whatsapp:$('tWhats').value.trim(),specialization:$('tSpec').value.trim()};if(!d.name)return toast('اسم المهندس مطلوب');try{await post({module:'technicians',action:'add',data:d});toast('تمت الإضافة');$('tName').value='';$('tPhone').value='';$('tWhats').value='';$('tSpec').value='';techs=await api('?module=technicians');renderTechs()}catch(e){toast(e.message)}}
+async function toggleTech(id){try{await post({module:'technicians',action:'toggle',data:{id}});techs=await api('?module=technicians');renderTechs()}catch(e){toast(e.message)}}
+function openSettings(){$('sCompany').value=settings.Company_Name||'';$('sUser').value=settings.User_Name||'';$('sCurrency').value=settings.Currency||'ج.م';$('sWarranty').value=settings.Warranty_Default_Days||30;$('settingsModal').style.display='block'}
+async function saveSettings(){try{await post({module:'settings',data:{Company_Name:$('sCompany').value,User_Name:$('sUser').value,Currency:$('sCurrency').value,Warranty_Default_Days:$('sWarranty').value}});toast('تم الحفظ');closeModals();await loadAll(true)}catch(e){toast(e.message)}}
 </script>
 </body>
 </html>
