@@ -3,54 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ماي فون | إدارة الصيانة</title>
+<title>إدارة الصيانة V2 | ERP</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--primary:#714B67; --secondary:#017E84; --bg:#f3f4f6; --text:#1f2937; --border:#e5e7eb;}
+  :root{--primary:#714B67; --secondary:#017E84; --bg:#f3f4f6; --text:#1f2937; --border:#e5e7eb; --danger:#ef4444;}
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
   body{background:var(--bg);color:var(--text)}
+  
+  /* الواجهة العلوية */
   .navbar{background:var(--primary);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;}
-  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;text-decoration:none}
-  .btn:hover{opacity:0.9}
+  .sys-info{font-size:13px;opacity:0.9;margin-top:4px;}
+  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn:hover:not(:disabled){opacity:0.9;transform:translateY(-1px)}
+  .btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none}
+  .btn-green{background:#10b981} .btn-red{background:var(--danger)} .btn-sec{background:var(--secondary)}
+
+  /* التخطيط والجدول */
   .container{padding:20px;max-width:1400px;margin:auto;}
-  .toolbar{display:flex;gap:15px;margin-bottom:20px;background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+  .toolbar{display:flex;gap:15px;margin-bottom:20px;background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);align-items:center}
   .search-box{flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none}
   .table-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow-x:auto;}
   table{width:100%;border-collapse:collapse;}
-  th{background:#f9fafb;padding:12px;text-align:right;font-size:14px;color:#6b7280;border-bottom:1px solid var(--border)}
-  td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;}
+  th{background:#f9fafb;padding:12px;text-align:right;font-size:13px;color:#6b7280;border-bottom:1px solid var(--border)}
+  td{padding:12px;border-bottom:1px solid var(--border);font-size:13px;}
   tr:hover{background:#f3f4f6;cursor:pointer}
-  .badge{padding:4px 10px;border-radius:20px;font-size:12px;color:#fff;font-weight:600}
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
-  .modal{background:#fff;width:500px;max-width:95%;border-radius:12px;padding:24px;max-height:90vh;overflow-y:auto;}
-  .form-group{margin-bottom:12px;}
-  .form-group label{display:block;font-size:13px;margin-bottom:4px;color:#4b5563}
-  .form-group input, .form-group select, .form-group textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;}
-  .timeline{margin-top:20px;padding-right:15px;border-right:2px solid var(--secondary);}
-  .timeline-item{position:relative;margin-bottom:15px;padding-right:20px;}
-  .timeline-item::before{content:"";position:absolute;right:-21px;top:5px;width:12px;height:12px;background:var(--secondary);border-radius:50%;border:3px solid #fff}
-  .tl-date{font-size:12px;color:#6b7280}
-  .tl-status{font-weight:bold;color:var(--primary)}
-  .tl-note{font-size:13px;background:#f9fafb;padding:8px;border-radius:6px;margin-top:5px;}
+  .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:#fff;font-weight:600}
+
+  /* النوافذ المنبثقة */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px)}
+  .modal{background:#fff;width:600px;max-width:95%;border-radius:12px;padding:24px;max-height:90vh;overflow-y:auto;position:relative}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-group.full{grid-column:1 / -1}
+  .form-group label{display:block;font-size:12px;margin-bottom:4px;color:#4b5563;font-weight:bold}
+  .form-group input, .form-group select, .form-group textarea{width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;outline:none;font-size:13px}
+  .form-group input:focus{border-color:var(--secondary)}
+
+  /* نظام الطباعة (يظهر فقط عند الطباعة) */
+  #printArea{display:none;}
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; left: 0; top: 0; width: 100%; display: block; padding: 20px; background: #fff; }
+    .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+    .print-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+    .print-footer { text-align: center; margin-top: 30px; font-size: 12px; border-top: 1px solid #000; padding-top: 10px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- شريط التنقل العلوي -->
 <nav class="navbar">
-  <div style="font-size:20px;font-weight:bold">🔧 قسم الصيانة</div>
-  <a href="index.html" class="btn" style="background:#4b5563">🏠 الرئيسية</a>
+  <div>
+    <div style="font-size:20px;font-weight:bold">🔧 إدارة الصيانة</div>
+    <div class="sys-info" id="sysInfo">جاري تحميل بيانات الشركة...</div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-sec" onclick="loadData()">🔄 تحديث</button>
+    <a href="index.html" class="btn" style="background:#4b5563">🏠 الرئيسية</a>
+  </div>
 </nav>
 
 <div class="container">
   <div class="toolbar">
-    <button class="btn" style="background:var(--secondary)" onclick="openNewOrderModal()">➕ استلام جهاز جديد</button>
-    <input type="text" class="search-box" id="searchInput" placeholder="🔍 استعلام (رقم الطلب، اسم العميل، الهاتف، المهندس)..." onkeyup="filterTable()">
+    <button class="btn btn-sec" onclick="openModal('newOrderModal')">➕ استلام جهاز جديد</button>
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 استعلام برقم الطلب، اسم العميل، الهاتف، أو السيريال (IMEI)..." onkeyup="filterTable()">
   </div>
 
   <div class="table-card">
     <table>
-      <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>الجهاز</th><th>المهندس</th><th>التكلفة</th><th>الحالة</th><th>التاريخ</th></tr></thead>
-      <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
+      <thead><tr><th>الطلب</th><th>العميل</th><th>الهاتف</th><th>الجهاز</th><th>السيريال</th><th>المهندس</th><th>التكلفة</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+      <tbody id="tableBody"><tr><td colspan="9" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -58,59 +81,75 @@
 <!-- نافذة استلام جهاز -->
 <div class="modal-overlay" id="newOrderModal">
   <div class="modal">
-    <h3 style="margin-bottom:15px;color:var(--primary)">📝 كرت استلام جديد</h3>
-    <div class="form-group"><input id="nName" placeholder="اسم العميل"></div>
-    <div class="form-group"><input id="nPhone" placeholder="رقم الهاتف"></div>
-    <div class="form-group"><input id="nDevice" placeholder="نوع الجهاز (مثال: iPhone 13)"></div>
-    <div class="form-group"><textarea id="nIssue" placeholder="وصف العطل" rows="2"></textarea></div>
-    <div class="form-group"><input id="nTech" placeholder="اسم المهندس (مثال: م. أحمد)"></div>
-    <div class="form-group"><input id="nCost" type="number" placeholder="التكلفة التقديرية"></div>
+    <h3 style="margin-bottom:15px;color:var(--primary)">📝 كرت استلام جهاز جديد</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>اسم العميل *</label><input id="nName" placeholder="محمد أحمد"></div>
+      <div class="form-group"><label>رقم الهاتف *</label><input id="nPhone" type="tel" placeholder="010XXXXXXXX"></div>
+      <div class="form-group"><label>نوع الجهاز *</label><input id="nDevice" placeholder="iPhone 13 Pro"></div>
+      <div class="form-group"><label>سيريال / IMEI</label><input id="nSerial" placeholder="15 رقم للحماية"></div>
+      <div class="form-group full"><label>شكوى العميل / وصف العطل *</label><textarea id="nIssue" rows="2"></textarea></div>
+      <div class="form-group"><label>المهندس المختص</label><select id="nTech"><option value="">جاري التحميل...</option></select></div>
+      <div class="form-group"><label>التكلفة المبدئية (ج.م)</label><input id="nCost" type="number" placeholder="0"></div>
+    </div>
+    
     <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn" style="flex:1" id="btnSaveNew" onclick="saveNewOrder()">💾 حفظ</button>
-      <button class="btn" style="flex:1;background:#ef4444" onclick="closeModals()">❌ إلغاء</button>
+      <button class="btn btn-sec" style="flex:1" id="btnSaveNew" onclick="saveNewOrder()">💾 حفظ واستلام</button>
+      <button class="btn" style="background:#6b7280" onclick="closeModals()">إلغاء</button>
     </div>
   </div>
 </div>
 
-<!-- نافذة التفاصيل والتحديث -->
+<!-- نافذة تحديث الطلب وكشف الحساب -->
 <div class="modal-overlay" id="detailsModal">
-  <div class="modal" style="width:600px">
-    <h3 style="margin-bottom:15px;color:var(--primary)">🔍 ملف الجهاز</h3>
-    <div id="orderDetailsHeader" style="background:#f3f4f6;padding:10px;border-radius:6px;margin-bottom:15px;font-size:14px;line-height:1.6"></div>
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+      <h3 color:var(--primary)>🔍 ملف الجهاز</h3>
+      <div>
+        <button class="btn btn-green" style="font-size:11px" onclick="printReceipt('receipt')">🖨️ استلام</button>
+        <button class="btn btn-sec" style="font-size:11px" onclick="printReceipt('invoice')">🖨️ فاتورة تسليم</button>
+        <button class="btn btn-green" style="font-size:11px" onclick="sendWhatsApp('customer')">💬 واتساب العميل</button>
+      </div>
+    </div>
+    
+    <div id="orderDetailsHeader" style="background:#f9fafb;padding:12px;border-radius:6px;margin-bottom:15px;font-size:13px;border:1px solid var(--border)"></div>
 
-    <div style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff">
-      <h4 style="margin-bottom:10px;color:var(--secondary)">➕ إضافة تحديث للحالة</h4>
+    <div class="form-grid" style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff">
       <input type="hidden" id="uId">
-      <div class="form-group">
+      <div class="form-group"><label>تحديث الحالة</label>
         <select id="uStatus">
-          <option value="Pending">قيد الانتظار (Pending)</option>
-          <option value="In_Progress">جاري العمل (In Progress)</option>
-          <option value="Waiting_Parts">بانتظار قطع غيار (Waiting Parts)</option>
-          <option value="Completed">مكتمل ✅ (Completed)</option>
-          <option value="Delivered">تم التسليم 🤝 (Delivered)</option>
-          <option value="Cancelled">ملغي ❌ (Cancelled)</option>
+          <option value="Pending">قيد الانتظار</option>
+          <option value="In_Progress">جاري العمل</option>
+          <option value="Waiting_Parts">بانتظار قطع غيار</option>
+          <option value="Completed">مكتمل ✅</option>
+          <option value="Delivered">تم التسليم 🤝</option>
+          <option value="Cancelled">ملغي ❌</option>
         </select>
       </div>
-      <div class="form-group"><input id="uTech" placeholder="المهندس"></div>
-      <div class="form-group"><input id="uCost" type="number" placeholder="تعديل التكلفة 최종"></div>
-      <div class="form-group"><textarea id="uNote" placeholder="ملاحظات الصيانة..." rows="2"></textarea></div>
-      <button class="btn" id="btnUpdate" style="width:100%" onclick="updateOrder()">🚀 حفظ التحديث</button>
+      <div class="form-group"><label>تحويل لمهندس آخر</label><select id="uTech"></select></div>
+      <div class="form-group"><label>التكلفة النهائية</label><input id="uFinalCost" type="number"></div>
+      <div class="form-group"><label>الخصم (إن وجد)</label><input id="uDiscount" type="number" value="0"></div>
+      <div class="form-group"><label>المبلغ المدفوع (مقدم/كامل)</label><input id="uPaid" type="number"></div>
+      <div class="form-group full"><label>ملاحظات التحديث</label><textarea id="uNote" rows="2" placeholder="ما الذي تم إنجازه؟"></textarea></div>
+      
+      <div class="form-group full" style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn" id="btnUpdate" style="flex:2" onclick="updateOrder()">🚀 حفظ التحديث</button>
+        <button class="btn btn-red" id="btnDelete" style="flex:1" onclick="deleteOrder()">🗑️ حذف نهائي</button>
+      </div>
     </div>
 
-    <h4 style="margin-top:20px">📜 السجل التاريخي</h4>
-    <div class="timeline" id="orderTimeline"></div>
-    <button class="btn" style="width:100%;margin-top:15px;background:#9ca3af" onclick="closeModals()">رجوع</button>
+    <div style="margin-top:15px;text-align:center"><button class="btn" style="background:#9ca3af;width:100%" onclick="closeModals()">إغلاق</button></div>
   </div>
 </div>
 
+<!-- منطقة الطباعة (مخفية) -->
+<div id="printArea"></div>
+
 <script>
-// الرابط الخاص بك الذي تم استخراجه من Google Apps Script
-const API_URL = "https://script.google.com/macros/s/AKfycbzxVaO3z7NpkuJtDpp20Wgy3JmDNnEKS-VwjozGIDSvQusQqxaPSqqlNb3AlZPbLsTzOQ/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbwk-nLf9lbGhRr1Xmdr5OXieyTwu7Z_RnSR6AknkhGlpDJo-8BnBm-ZJgw3pVLAHHgw1w/exec"; 
 let allOrders = [];
+let sysSettings = {};
+let currentOrder = null;
 
-window.onload = loadOrders;
-
-// الترجمة المرئية للحالات الإنجليزية
 const statusMap = {
   'Pending': { text: 'انتظار', color: '#f59e0b' },
   'In_Progress': { text: 'جاري العمل', color: '#3b82f6' },
@@ -120,101 +159,197 @@ const statusMap = {
   'Cancelled': { text: 'ملغي', color: '#6b7280' }
 };
 
-async function loadOrders(){
+window.onload = loadData;
+
+// 1. جلب البيانات والإعدادات
+async function loadData(){
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center">⏳ جاري جلب البيانات...</td></tr>`;
+  
   try {
-    const res = await fetch(API_URL + "?module=maintenance");
-    allOrders = await res.json();
+    // جلب الإعدادات
+    const resSettings = await fetch(API_URL + "?module=settings");
+    sysSettings = await resSettings.json();
+    document.getElementById('sysInfo').innerText = `🏢 ${sysSettings.Company_Name} | 👤 ${sysSettings.User_Name}`;
+    
+    // تعبئة قوائم المهندسين
+    const techOptions = sysSettings.Technicians.map(t => `<option value="${t}">${t}</option>`).join('');
+    document.getElementById('nTech').innerHTML = techOptions;
+    document.getElementById('uTech').innerHTML = techOptions;
+
+    // جلب الطلبات
+    const resOrders = await fetch(API_URL + "?module=maintenance");
+    allOrders = await resOrders.json();
     renderTable(allOrders);
   } catch(e) {
-    document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">خطأ في الاتصال بقاعدة البيانات.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="color:red;text-align:center">❌ حدث خطأ في الاتصال بقاعدة البيانات.</td></tr>`;
   }
 }
 
+// 2. عرض الجدول
 function renderTable(data){
   const tbody = document.getElementById('tableBody');
   if(!data || data.length === 0){
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">لا توجد طلبات.</td></tr>`; return;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center">لا توجد طلبات.</td></tr>`; return;
   }
   tbody.innerHTML = data.map(o => {
     const st = statusMap[o.status] || { text: o.status, color: '#333' };
     return `<tr onclick="openDetails('${o.id}')">
       <td style="font-weight:bold;color:var(--secondary)">${o.id}</td>
       <td>${o.name}</td><td dir="ltr">${o.phone}</td><td>${o.device}</td>
-      <td>${o.tech}</td><td style="font-weight:bold">${o.cost||0}</td>
+      <td style="font-size:11px;color:#888">${o.serial || '-'}</td>
+      <td>${o.tech}</td><td style="font-weight:bold">${o.final_cost || o.initial_cost || 0}</td>
       <td><span class="badge" style="background:${st.color}">${st.text}</span></td>
       <td style="font-size:12px;color:#888">${o.date.split(' / ')[0]}</td>
     </tr>`;
   }).join('');
 }
 
+// 3. البحث
 function filterTable(){
   const term = document.getElementById('searchInput').value.toLowerCase();
   const filtered = allOrders.filter(o => 
-    o.id.toLowerCase().includes(term) || o.name.toLowerCase().includes(term) || o.phone.includes(term)
+    o.id.toLowerCase().includes(term) || o.name.toLowerCase().includes(term) || 
+    o.phone.includes(term) || (o.serial && o.serial.toLowerCase().includes(term))
   );
   renderTable(filtered);
 }
 
-function openNewOrderModal(){ document.getElementById('newOrderModal').style.display='flex'; }
+// 4. النوافذ
+function openModal(id){ document.getElementById(id).style.display='flex'; }
 function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
 
+// 5. حفظ طلب جديد
 async function saveNewOrder(){
-  if(!nName.value || !nDevice.value) return alert("يرجى إدخال اسم العميل ونوع الجهاز!");
-  const btn = document.getElementById('btnSaveNew'); btn.innerText = "⏳ جاري الحفظ...";
+  if(!nName.value || !nDevice.value || !nIssue.value) return alert("يرجى إكمال الحقول الإلزامية (*)");
+  const btn = document.getElementById('btnSaveNew'); 
+  btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
   
   const payload = {
-    module: "maintenance", action: "create",
-    data: { name: nName.value, phone: nPhone.value, device: nDevice.value, issue: nIssue.value, tech: nTech.value, cost: nCost.value }
+    module: "maintenance", action: "create", user: sysSettings.User_Name,
+    data: { name: nName.value, phone: nPhone.value, device: nDevice.value, serial: nSerial.value, issue: nIssue.value, tech: nTech.value, initial_cost: nCost.value }
   };
 
   await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify(payload) });
   
-  closeModals(); btn.innerText = "💾 حفظ";
-  ['nName','nPhone','nDevice','nIssue','nTech','nCost'].forEach(id=>document.getElementById(id).value='');
-  loadOrders();
+  // إرسال للمهندس عبر واتساب (اختياري)
+  if(confirm("تم الحفظ! هل تريد إرسال تفاصيل الجهاز للمهندس عبر واتساب؟")){
+    const msg = `🔧 *جهاز جديد للصيانة*\nالعميل: ${nName.value}\nالجهاز: ${nDevice.value}\nالعطل: ${nIssue.value}\nيرجى الفحص.`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  closeModals(); btn.disabled = false; btn.innerText = "💾 حفظ واستلام";
+  ['nName','nPhone','nDevice','nSerial','nIssue','nCost'].forEach(id=>document.getElementById(id).value='');
+  loadData();
 }
 
+// 6. فتح تفاصيل الطلب
 function openDetails(id){
-  const order = allOrders.find(o => o.id === id);
-  if(!order) return;
+  currentOrder = allOrders.find(o => o.id === id);
+  if(!currentOrder) return;
 
-  document.getElementById('uId').value = order.id;
-  document.getElementById('uCost').value = order.cost;
-  document.getElementById('uTech').value = order.tech;
-  document.getElementById('uStatus').value = order.status;
+  document.getElementById('uId').value = currentOrder.id;
+  document.getElementById('uStatus').value = currentOrder.status;
+  document.getElementById('uTech').value = currentOrder.tech;
+  document.getElementById('uFinalCost').value = currentOrder.final_cost || currentOrder.initial_cost || 0;
+  document.getElementById('uDiscount').value = currentOrder.discount || 0;
+  document.getElementById('uPaid').value = currentOrder.paid || 0;
   document.getElementById('uNote').value = '';
 
   document.getElementById('orderDetailsHeader').innerHTML = `
-    <strong>العميل:</strong> ${order.name} (${order.phone})<br>
-    <strong>الجهاز:</strong> ${order.device} | <strong>العطل:</strong> ${order.issue}
+    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:5px">
+      <span><strong>الطلب:</strong> <span style="color:var(--secondary)">${currentOrder.id}</span></span>
+      <span><strong>التاريخ:</strong> ${currentOrder.date}</span>
+    </div>
+    <strong>العميل:</strong> ${currentOrder.name} (${currentOrder.phone})<br>
+    <strong>الجهاز:</strong> ${currentOrder.device} (S/N: ${currentOrder.serial || 'N/A'})<br>
+    <strong>الشكوى:</strong> ${currentOrder.issue}
   `;
 
-  document.getElementById('orderTimeline').innerHTML = order.history.map(h => {
-    const st = statusMap[h.status]?.text || h.status;
-    return `<div class="timeline-item">
-      <div class="tl-date">${h.date}</div>
-      <div class="tl-status">${st}</div>
-      ${h.note ? `<div class="tl-note">${h.note}</div>` : ''}
-      <div style="font-size:11px;color:#888;margin-top:4px">م. ${h.user}</div>
-    </div>`;
-  }).reverse().join('');
-
-  document.getElementById('detailsModal').style.display='flex';
+  openModal('detailsModal');
 }
 
+// 7. تحديث الطلب
 async function updateOrder(){
-  const btn = document.getElementById('btnUpdate'); btn.innerText = "⏳ جاري التحديث...";
+  const btn = document.getElementById('btnUpdate'); 
+  btn.disabled = true; btn.innerText = "⏳ جاري التحديث...";
+  
   const payload = {
-    module: "maintenance", action: "update",
+    module: "maintenance", action: "update", user: sysSettings.User_Name,
     data: {
       id: document.getElementById('uId').value, status: document.getElementById('uStatus').value,
-      note: document.getElementById('uNote').value, cost: document.getElementById('uCost').value,
-      tech: document.getElementById('uTech').value
+      tech: document.getElementById('uTech').value, final_cost: document.getElementById('uFinalCost').value,
+      discount: document.getElementById('uDiscount').value, paid: document.getElementById('uPaid').value,
+      note: document.getElementById('uNote').value
     }
   };
 
   await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify(payload) });
-  closeModals(); btn.innerText = "🚀 حفظ التحديث"; loadOrders();
+  closeModals(); btn.disabled = false; btn.innerText = "🚀 حفظ التحديث"; loadData();
+}
+
+// 8. الحذف الآمن
+async function deleteOrder(){
+  if(!confirm("⚠️ تحذير: هل أنت متأكد من حذف هذا الطلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+  const btn = document.getElementById('btnDelete'); 
+  btn.disabled = true; btn.innerText = "⏳ جاري الحذف...";
+  
+  await fetch(API_URL, { method: 'POST', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({ module: "maintenance", action: "delete", data: { id: currentOrder.id }}) });
+  closeModals(); btn.disabled = false; btn.innerText = "🗑️ حذف نهائي"; loadData();
+}
+
+// 9. التواصل عبر واتساب
+function sendWhatsApp(type){
+  if(!currentOrder) return;
+  let msg = '';
+  if(type === 'customer'){
+    const st = statusMap[currentOrder.status].text;
+    msg = `مرحباً أستاذ/ة ${currentOrder.name}،\nنفيدكم بأن جهازكم (${currentOrder.device}) حالته الآن: *${st}*.\nللاستفسار: ${sysSettings.Company_Name}`;
+  }
+  // إزالة الصفر الأول من الرقم المصري وإضافة المفتاح، أو تركه كما هو إذا لم يكن مصرياً
+  let phone = currentOrder.phone.startsWith('0') ? '2' + currentOrder.phone : currentOrder.phone;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// 10. الطباعة
+function printReceipt(type){
+  if(!currentOrder) return;
+  const printArea = document.getElementById('printArea');
+  const title = type === 'receipt' ? 'إيصال استلام جهاز' : 'فاتورة صيانة نهائية';
+  
+  let financialHTML = '';
+  if(type === 'receipt'){
+    financialHTML = `<div class="print-row"><span>التكلفة التقديرية:</span><span>${currentOrder.initial_cost || 0} ج.م</span></div>`;
+  } else {
+    const total = parseFloat(currentOrder.final_cost || 0);
+    const disc = parseFloat(currentOrder.discount || 0);
+    const net = total - disc;
+    financialHTML = `
+      <div class="print-row"><span>إجمالي الصيانة:</span><span>${total} ج.م</span></div>
+      <div class="print-row"><span>الخصم:</span><span>${disc} ج.م</span></div>
+      <div class="print-row" style="font-weight:bold;font-size:16px"><span>الصافي المطلوب:</span><span>${net} ج.م</span></div>
+    `;
+  }
+
+  printArea.innerHTML = `
+    <div class="print-header">
+      <h2>${sysSettings.Company_Name || 'إدارة الصيانة'}</h2>
+      <h3>${title}</h3>
+      <p style="font-size:12px">رقم الطلب: ${currentOrder.id} | التاريخ: ${currentOrder.date.split(' / ')[0]}</p>
+    </div>
+    <div class="print-row"><span>اسم العميل:</span><strong>${currentOrder.name}</strong></div>
+    <div class="print-row"><span>رقم الهاتف:</span><span>${currentOrder.phone}</span></div>
+    <div class="print-row"><span>الجهاز:</span><span>${currentOrder.device}</span></div>
+    <div class="print-row"><span>السيريال/IMEI:</span><span>${currentOrder.serial || 'غير مسجل'}</span></div>
+    <div class="print-row"><span>العطل/الشكوى:</span><span>${currentOrder.issue}</span></div>
+    <div style="border-top:2px solid #000;margin:15px 0"></div>
+    ${financialHTML}
+    <div class="print-footer">
+      <p>المستلم: ${sysSettings.User_Name} | المهندس: ${currentOrder.tech}</p>
+      <p>شكراً لثقتكم بنا!</p>
+    </div>
+  `;
+  window.print();
 }
 </script>
 </body>
