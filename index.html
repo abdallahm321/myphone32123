@@ -3,44 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ماي فون | لوحة التحكم</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<title>ماي فون | لوحة التحكم المركزية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #714B67; --bg: #f3f4f6; --text: #1f2937; }
+  :root { 
+    --primary: #714B67;    /* البنفسجي الخاص بك */
+    --secondary: #017E84;  /* لون قسم الصيانة */
+    --legal: #9f1239;      /* لون قسم القانونية (أحمر داكن) */
+    --bg: #f8fafc; 
+    --card-bg: #ffffff;
+    --text: #1f2937; 
+    --text-light: #64748b;
+  }
+  
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-  body { background: var(--bg); color: var(--text); }
-  .navbar { background: var(--primary); color: #fff; padding: 15px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 20px; font-weight: bold; }
-  .apps-grid { display: flex; gap: 20px; padding: 40px; flex-wrap: wrap; justify-content: center; max-width: 1000px; margin: auto; }
-  .app-card { background: #fff; border-radius: 12px; width: 160px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; text-decoration: none; color: var(--text); box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s; }
-  .app-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(113,75,103,0.3); }
-  .app-icon { width: 64px; height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #fff; }
-  .disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  
+  /* الشريط العلوي */
+  .navbar { 
+    background: linear-gradient(90deg, var(--primary) 0%, #4a3143 100%); 
+    color: #fff; 
+    padding: 15px 30px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .navbar .logo { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px; }
+  .navbar .user-profile { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; }
+  
+  /* منطقة الترحيب */
+  .welcome-section {
+    max-width: 1100px;
+    margin: 40px auto 10px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .welcome-section h1 { font-size: 28px; color: var(--primary); margin-bottom: 5px; }
+  .welcome-section p { color: var(--text-light); font-size: 15px; }
+
+  /* شبكة التطبيقات */
+  .apps-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .apps-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 25px; 
+    max-width: 900px; 
+    width: 100%;
+  }
+  
+  /* بطاقات التطبيقات */
+  .app-card { 
+    background: var(--card-bg); 
+    border-radius: 16px; 
+    padding: 30px 20px;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+    cursor: pointer; 
+    text-decoration: none; 
+    color: var(--text); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  }
+  
+  .app-card:hover:not(.disabled) { 
+    transform: translateY(-8px); 
+    box-shadow: 0 12px 25px rgba(113,75,103,0.15); 
+    border-color: #e2e8f0;
+  }
+  
+  .app-icon { 
+    width: 75px; 
+    height: 75px; 
+    border-radius: 20px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 38px; 
+    color: #fff; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .app-card:hover:not(.disabled) .app-icon {
+    transform: scale(1.08);
+  }
+
+  .app-title { font-weight: 700; font-size: 16px; letter-spacing: 0.3px; }
+  
+  /* التطبيقات المغلقة */
+  .disabled { 
+    opacity: 0.55; 
+    cursor: not-allowed; 
+    pointer-events: none; 
+    background: #f8fafc;
+  }
+  .disabled .app-icon { background: #94a3b8 !important; box-shadow: none; }
+
+  /* حقوق النشر */
+  .footer { text-align: center; padding: 20px; color: var(--text-light); font-size: 13px; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<nav class="navbar">📱 My Phone ERP</nav>
+<!-- الشريط العلوي -->
+<nav class="navbar">
+  <div class="logo">📱 My Phone ERP</div>
+  <div class="user-profile">
+    <span>👤</span>
+    <span>مدير النظام</span>
+  </div>
+</nav>
 
-<div class="apps-grid">
-  <!-- تطبيق الصيانة (يعمل) -->
-  <a href="maintenance.html" class="app-card">
-    <div class="app-icon" style="background:#017E84">🔧</div>
-    <div style="font-weight:bold">إدارة الصيانة</div>
-  </a>
+<!-- رسالة الترحيب -->
+<div class="welcome-section">
+  <h1>مرحباً بك في مساحة العمل</h1>
+  <p>اختر التطبيق الذي تود إدارته اليوم</p>
+</div>
 
-  <!-- باقي التطبيقات (مغلقة حالياً لحين برمجتها) -->
-  <a href="#" class="app-card disabled">
-    <div class="app-icon" style="background:#94a3b8">⚖️</div>
-    <div style="font-weight:bold">الشؤون القانونية</div>
-  </a>
-  <a href="#" class="app-card disabled">
-    <div class="app-icon" style="background:#94a3b8">👥</div>
-    <div style="font-weight:bold">العملاء</div>
-  </a>
-  <a href="#" class="app-card disabled">
-    <div class="app-icon" style="background:#94a3b8">💰</div>
-    <div style="font-weight:bold">الحسابات</div>
-  </a>
+<!-- قائمة التطبيقات -->
+<div class="apps-container">
+  <div class="apps-grid">
+    
+    <!-- 1. تطبيق الصيانة -->
+    <a href="maintenance.html" class="app-card">
+      <div class="app-icon" style="background: var(--secondary)">🔧</div>
+      <div class="app-title">إدارة الصيانة</div>
+    </a>
+
+    <!-- 2. تطبيق الشؤون القانونية (مفعل الآن) -->
+    <a href="legal.html" class="app-card">
+      <div class="app-icon" style="background: var(--legal)">⚖️</div>
+      <div class="app-title">الشؤون القانونية</div>
+    </a>
+
+    <!-- 3. تطبيق العملاء (مغلق) -->
+    <a href="#" class="app-card disabled">
+      <div class="app-icon">👥</div>
+      <div class="app-title">إدارة العملاء</div>
+    </a>
+
+    <!-- 4. تطبيق الحسابات (مغلق) -->
+    <a href="#" class="app-card disabled">
+      <div class="app-icon">💰</div>
+      <div class="app-title">الحسابات والأقساط</div>
+    </a>
+
+  </div>
+</div>
+
+<!-- تذييل الصفحة -->
+<div class="footer">
+  نظام الإدارة المتكامل My Phone © 2026
 </div>
 
 </body>
