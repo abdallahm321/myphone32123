@@ -3,60 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الشؤون القانونية | الإنذارات القضائية</title>
+<title>الشؤون القانونية والمتابعات | ERP</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--primary:#714B67; --secondary:#017E84; --bg:#f3f4f6; --text:#1f2937; --border:#e5e7eb; --danger:#ef4444;}
+  :root{--primary:#9f1239; --secondary:#be123c; --bg:#f8fafc; --text:#1f2937; --border:#e5e7eb; --warn:#f59e0b; --success:#10b981;}
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
   body{background:var(--bg);color:var(--text)}
 
-  .navbar{background:var(--primary);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1)}
-  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  /* الشريط العلوي */
+  .navbar{background:linear-gradient(90deg, var(--primary) 0%, #4a0415 100%);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow: 0 2px 10px rgba(0,0,0,0.1)}
+  .btn{background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;transition:0.2s;display:inline-flex;align-items:center;gap:6px}
   .btn:hover:not(:disabled){opacity:0.9;transform:translateY(-1px)}
-  .btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none}
-  .btn-sec{background:var(--secondary)} .btn-gray{background:#4b5563}
+  .btn:disabled{background:#9ca3af;cursor:not-allowed;}
+  .btn-sec{background:var(--secondary)} .btn-gray{background:#4b5563} .btn-green{background:var(--success)}
 
   .container{padding:20px;max-width:1400px;margin:auto;}
+
+  /* الإحصائيات */
+  .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px;}
+  .stat-card{background:#fff;border-radius:8px;padding:15px;box-shadow:0 1px 3px rgba(0,0,0,0.1);text-align:center;border-top:3px solid var(--primary)}
+  .stat-card .num{font-size:24px;font-weight:bold;color:var(--primary)}
+  .stat-card .lbl{font-size:13px;color:#64748b;margin-top:5px}
+
+  /* شريط الأدوات والجدول */
   .toolbar{display:flex;gap:12px;margin-bottom:20px;background:#fff;padding:15px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);align-items:center;flex-wrap:wrap}
-  .search-box{flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none}
+  .search-box{flex:1;min-width:250px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none}
+  .filter-select{padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;background:#fff}
 
   .table-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow-x:auto;}
   table{width:100%;border-collapse:collapse;min-width:1000px}
-  th{background:#f9fafb;padding:12px;text-align:right;font-size:13px;color:#6b7280;border-bottom:1px solid var(--border)}
-  td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;}
-  tr:hover{background:#f3f4f6;}
-  .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:#fff;font-weight:600;background:var(--secondary)}
+  th{background:#f1f5f9;padding:12px;text-align:right;font-size:13px;color:#475569;border-bottom:1px solid var(--border)}
+  td{padding:12px;border-bottom:1px solid var(--border);font-size:13px;}
+  tr:hover{background:#f8fafc;cursor:pointer}
+  .badge{padding:4px 10px;border-radius:20px;font-size:11px;color:#fff;font-weight:600;}
 
   /* النوافذ المنبثقة */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);padding:20px}
-  .modal{background:#fff;width:600px;max-width:95%;border-radius:12px;padding:24px;max-height:92vh;overflow-y:auto;}
+  .modal{background:#fff;width:650px;max-width:95%;border-radius:12px;padding:24px;max-height:92vh;overflow-y:auto;}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .form-group.full{grid-column:1 / -1}
-  .form-group label{display:block;font-size:12px;margin-bottom:4px;color:#4b5563;font-weight:bold}
-  .form-group input, .form-group select{width:100%;padding:9px;border:1px solid var(--border);border-radius:6px;outline:none;font-size:13px}
+  .form-group label{display:block;font-size:12px;margin-bottom:4px;color:#475569;font-weight:bold}
+  .form-group input, .form-group select, .form-group textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;font-size:13px}
+  .form-group input:focus, .form-group select:focus{border-color:var(--primary)}
 
-  /* =========================================================
-     نظام الطباعة الرسمي (صيغة المحكمة) مخفي في الشاشة
-     ========================================================= */
+  /* نظام الطباعة للمحضر */
   #printArea{display:none;}
   @media print {
     body * { visibility: hidden; }
     #printArea, #printArea * { visibility: visible; }
-    #printArea { 
-        position: absolute; left: 0; top: 0; width: 100%; display: block; 
-        padding: 40px; background: #fff; font-family: 'Arial', 'Cairo', sans-serif; 
-        font-size: 18px; line-height: 1.8; color: #000;
-    }
-    .legal-title { text-align: center; font-weight: bold; font-size: 22px; margin-bottom: 20px; }
-    .flex-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .marginalia { 
-        width: 180px; text-align: center; border: 2px solid #000; 
-        padding: 10px; font-weight: bold; border-radius: 8px; font-size: 16px;
-    }
-    .lawyer-stamp {
-        width: 220px; text-align: center; border: 3px double #0000ff; color: #0000ff;
-        padding: 10px; font-weight: bold; border-radius: 8px; font-size: 18px; margin: 10px auto;
-    }
+    #printArea { position: absolute; left: 0; top: 0; width: 100%; padding: 40px; font-family: 'Arial', sans-serif; font-size: 18px; line-height: 1.8; color: #000; }
+    .legal-title { text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 25px; }
+    .flex-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .marginalia { width: 180px; text-align: center; border: 2px solid #000; padding: 10px; font-weight: bold; border-radius: 8px; font-size: 16px; }
+    .lawyer-stamp { width: 220px; text-align: center; border: 3px double #0000ff; color: #0000ff; padding: 10px; font-weight: bold; border-radius: 8px; font-size: 18px; margin: 10px auto; }
     .p-text { margin-bottom: 15px; text-align: justify; }
     .p-bold { font-weight: bold; text-decoration: underline; }
   }
@@ -65,211 +64,291 @@
 <body>
 
 <nav class="navbar">
-  <div style="font-size:20px;font-weight:bold">⚖️ الشؤون القانونية | الإنذارات القضائية</div>
+  <div style="font-size:20px;font-weight:bold">⚖️ الشؤون القانونية والمتابعات</div>
   <div style="display:flex;gap:8px">
-    <button class="btn btn-sec" onclick="loadData()">🔄 تحديث</button>
-    <a href="index.html" class="btn btn-gray">🏠 الرئيسية</a>
+    <button class="btn btn-sec" onclick="loadData()">🔄 تحديث البيانات</button>
+    <a href="index.html" class="btn btn-gray" style="text-decoration:none">🏠 الرئيسية</a>
   </div>
 </nav>
 
 <div class="container">
+  <!-- لوحة الإحصائيات (مستوحاة من أفكار الـ Access DB) -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card"><div class="num" id="stTotal">0</div><div class="lbl">إجمالي الإجراءات</div></div>
+    <div class="stat-card"><div class="num" id="stWarnings" style="color:var(--warn)">0</div><div class="lbl">إنذارات نشطة</div></div>
+    <div class="stat-card"><div class="num" id="stFollowups" style="color:var(--success)">0</div><div class="lbl">متابعات قادمة</div></div>
+    <div class="stat-card"><div class="num" id="stAmount">0 ج.م</div><div class="lbl">مبالغ قيد التحصيل</div></div>
+  </div>
+
   <div class="toolbar">
-    <button class="btn btn-sec" onclick="openModal('newNoticeModal')">➕ إنشاء إنذار جديد</button>
-    <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث باسم العميل أو رقم الإنذار..." onkeyup="filterTable()">
+    <button class="btn" onclick="openModal('newNoticeModal')">➕ إنشاء إنذار / متابعة</button>
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث باسم العميل، المحامي، أو الرقم..." onkeyup="filterTable()">
+    <select class="filter-select" id="typeFilter" onchange="filterTable()">
+      <option value="">كل الإجراءات</option>
+      <option value="إنذار">إنذارات فقط</option>
+      <option value="متابعة">متابعات فقط</option>
+    </select>
   </div>
 
   <div class="table-card">
     <table>
       <thead><tr>
-        <th>رقم الإنذار</th><th>الطالب (الراسل)</th><th>المنذر إليه (العميل)</th><th>المبلغ</th><th>المحامي</th><th>التاريخ</th><th>إجراء</th>
+        <th>المعرف</th><th>نوع الإجراء</th><th>العميل المتعثر</th><th>المبلغ</th><th>المحامي / المتابع</th><th>تاريخ الإجراء</th><th>تاريخ المتابعة (NewDate)</th><th>الحالة</th>
       </tr></thead>
-      <tbody id="tableBody"><tr><td colspan="7" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
+      <tbody id="tableBody"><tr><td colspan="8" style="text-align:center">⏳ جاري جلب البيانات...</td></tr></tbody>
     </table>
   </div>
 </div>
 
-<!-- نافذة إنشاء إنذار جديد -->
+<!-- نافذة إنشاء إجراء قانوني / متابعة -->
 <div class="modal-overlay" id="newNoticeModal">
   <div class="modal">
-    <h3 style="margin-bottom:15px;color:var(--primary)">📝 مسودة إنذار قضائي جديد</h3>
+    <h3 style="margin-bottom:15px;color:var(--primary)">📝 إضافة إجراء قانوني أو متابعة</h3>
     <div class="form-grid">
-      <div class="form-group full"><label>اسم الطالب (الشاكي) *</label><input id="nApplicant" value="عبدالله محمد عبدربه أبوالحسن"></div>
-      <div class="form-group full"><label>ناحية الطالب *</label><input id="nAppAddress" value="الطليحات - مركز جهينة - سوهاج"></div>
-      
-      <div class="form-group full"><label>المنذر إليه (المشكو في حقه) *</label><input id="nDefendant" placeholder="اسم العميل المتعثر"></div>
-      <div class="form-group full"><label>حيث إقامة ووجود (ناحية المنذر إليه) *</label><input id="nDefAddress" placeholder="عنوان العميل"></div>
-      
-      <div class="form-group"><label>المبلغ المطالب به (بالأرقام) *</label><input id="nAmount" type="number" placeholder="مثال: 90000"></div>
-      <div class="form-group"><label>المبلغ (بالحروف)</label><input id="nAmountText" placeholder="مثال: تسعون ألف جنيه فقط لا غير"></div>
-
       <div class="form-group full">
-        <label>المحامي الموكل *</label>
-        <select id="nLawyer">
-            <!-- قائمة المحامين من ملف mohame.xlsx -->
-            <option value="فهد محمود ضيف الله|جهينة الجزئية">فهد محمود ضيف الله (جهينة الجزئية)</option>
-            <option value="احمد علي الرفاعي|جهينة الجزئية">احمد علي الرفاعي (جهينة الجزئية)</option>
-            <option value="عادل محمود مجيد|جهينة الجزئية">عادل محمود مجيد (جهينة الجزئية)</option>
-            <option value="احمد محمود عبدالمنعم احمد|جهينة الجزئية">احمد محمود عبدالمنعم احمد (جهينة الجزئية)</option>
-            <option value="فاطمة محمد عبدربه أبو الحسن|جهينة الجزئية">فاطمة محمد عبدربه أبو الحسن (جهينة الجزئية)</option>
+        <label>نوع الإجراء (RecordType) *</label>
+        <select id="nType" onchange="toggleLegalFields()">
+          <option value="إنذار">إنذار قضائي</option>
+          <option value="متابعة">متابعة تحصيل / هاتفية</option>
         </select>
       </div>
+
+      <div class="form-group full"><label>اسم العميل المتعثر *</label><input id="nDefendant" placeholder="مثال: أحمد محمود"></div>
+      <div class="form-group full legal-only"><label>عنوان العميل (للمحضر) *</label><input id="nDefAddress" placeholder="ناحية العميل..."></div>
+      
+      <div class="form-group"><label>المبلغ المطالب به (ج.م) *</label><input id="nAmount" type="number"></div>
+      <div class="form-group legal-only"><label>المبلغ بالحروف</label><input id="nAmountText" placeholder="مثال: عشرون ألف جنيه"></div>
+
+      <div class="form-group legal-only">
+        <label>المحامي الموكل *</label>
+        <select id="nLawyer">
+            <option value="فهد محمود ضيف الله|جهينة الجزئية">فهد محمود ضيف الله</option>
+            <option value="احمد علي الرفاعي|جهينة الجزئية">احمد علي الرفاعي</option>
+            <option value="عادل محمود مجيد|جهينة الجزئية">عادل محمود مجيد</option>
+            <option value="فاطمة محمد عبدربه|جهينة الجزئية">فاطمة محمد عبدربه</option>
+        </select>
+      </div>
+      <div class="form-group"><label>تاريخ المتابعة القادم (NewDate2)</label><input id="nNextDate" type="date"></div>
+
+      <div class="form-group full legal-only"><label>اسم الطالب (الراسل)</label><input id="nApplicant" value="عبدالله محمد عبدربه أبوالحسن"></div>
+      <div class="form-group full"><label>ملاحظات (البيان)</label><textarea id="nNotes" rows="2" placeholder="تفاصيل المتابعة أو الإجراء..."></textarea></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn btn-sec" style="flex:1" id="btnSave" onclick="saveNotice()">💾 حفظ وطباعة الإنذار</button>
+      <button class="btn" style="flex:1" id="btnSave" onclick="saveAction()">💾 حفظ الإجراء</button>
       <button class="btn btn-gray" onclick="closeModals()">إلغاء</button>
     </div>
   </div>
 </div>
 
-<!-- =========================================================
-     منطقة الطباعة (المحضر الرسمي) كما في ملف Word
-     ========================================================= -->
+<!-- نافذة تحديث الإجراء والطباعة -->
+<div class="modal-overlay" id="detailsModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+      <h3 style="color:var(--primary)">🔍 تفاصيل الإجراء القانوني</h3>
+      <button class="btn btn-sec" id="btnPrintBtn" onclick="printNotice()">🖨️ طباعة الإنذار الرسمي</button>
+    </div>
+    
+    <div id="detailsHeader" style="background:#f1f5f9;padding:12px;border-radius:6px;margin-bottom:15px;font-size:13px;border:1px solid var(--border)"></div>
+
+    <div class="form-grid" style="border:1px solid var(--border);padding:15px;border-radius:8px;background:#fff">
+      <input type="hidden" id="uId">
+      <div class="form-group full"><label>تحديث الحالة</label>
+        <select id="uStatus">
+          <option value="مسجل بالنظام">مسجل بالنظام</option>
+          <option value="قيد التسليم للمحضر">قيد التسليم للمحضر</option>
+          <option value="تم الإعلان">تم الإعلان</option>
+          <option value="تحدد جلسة">تحدد جلسة</option>
+          <option value="تم التصالح / السداد">تم التصالح / السداد ✅</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>تحديث تاريخ المتابعة</label><input id="uNextDate" type="date"></div>
+      <div class="form-group full"><label>إضافة ملاحظة للتاريخ</label><textarea id="uNotes" rows="2"></textarea></div>
+      
+      <div class="form-group full" style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn" id="btnUpdate" style="flex:1" onclick="updateAction()">🚀 حفظ التحديث</button>
+      </div>
+    </div>
+    <div style="margin-top:15px;text-align:center"><button class="btn btn-gray" style="width:100%" onclick="closeModals()">إغلاق</button></div>
+  </div>
+</div>
+
+<!-- منطقة الطباعة للمحضر -->
 <div id="printArea">
     <div class="legal-title">بسم الله الرحمن الرحيم</div>
     <div class="p-text">انه في يوم .................... الموافق &nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-    <div class="p-text">بناء على طلب السيد / <span class="p-bold" id="pApplicant"></span> من ناحية <span class="p-bold" id="pAppAddress"></span></div>
+    <div class="p-text">بناء على طلب السيد / <span class="p-bold" id="pApplicant"></span> من ناحية الطليحات - مركز جهينة - سوهاج</div>
     <div class="p-text">ومحله المختار مكتب الاستاذ / <span class="p-bold" id="pLawyer"></span> المحامي بـ <span class="p-bold" id="pCourt"></span></div>
-    
     <div class="flex-row" style="margin-top: 20px;">
         <div style="flex:1;">
             <div class="p-text">انا ......................... محضر محكمة ......................... انتقلت في تاريخه اعلاه:</div>
             <div class="p-text">الي ناحيه <span class="p-bold" id="pDefAddress"></span> حيث اقامة ووجـود:</div>
             <div class="p-text">1 - <span class="p-bold" id="pDefendant"></span> مخاطبا مع .........................</div>
         </div>
-        <div class="marginalia">
-            إنــذار علـي يـــد<br>محضـــــــــــــــــر<br>كطلـــــــــــــــــــب<br>الطالـــــــــــــــــب<br>وتحــــــــــــــــــت<br>مسئوليتـــــــــــــه
-        </div>
+        <div class="marginalia">إنــذار علـي يـــد<br>محضـــــــــــــــــر<br>كطلـــــــــــــــــــب<br>الطالـــــــــــــــــب<br>وتحــــــــــــــــــت<br>مسئوليتـــــــــــــه</div>
     </div>
-
     <div class="legal-title" style="margin-top:20px;">وأنذرته بالاتي :</div>
-    <div class="p-text">
-        بموجب ايصال امانة تسلم المنذر اليه من الطالب مبلغ وقدره (<span class="p-bold" id="pAmount"></span>) جنيهاً مصرياً، (<span id="pAmountText"></span>)<br>
-        علي سبيل الامانة لتوصيله ليد / <span class="p-bold" id="pApplicant2"></span> الا انه اختلـس هذا المبلغ وبدده لنفسه أضرار بالطالب.
-    </div>
-
+    <div class="p-text">بموجب ايصال امانة تسلم المنذر اليه من الطالب مبلغ وقدره (<span class="p-bold" id="pAmount"></span>) جنيهاً مصرياً، (<span id="pAmountText"></span>)<br>علي سبيل الامانة لتوصيله ليد / <span class="p-bold" id="pApplicant2"></span> الا انه اختلـس هذا المبلغ وبدده لنفسه أضرار بالطالب.</div>
     <div class="flex-row" style="margin-top: 30px;">
         <div style="flex:1; padding-left: 20px;">
             <div class="p-bold" style="font-size: 20px; margin-bottom:10px;">لــــــــــذلك:</div>
-            <div class="p-text">
-                انا المحضر سالف الذكر قد انتقلت حيث إقامة المنذر اليه وأنذرته بسداد المبــلغ المذكور للطالب في غضون أسبوع من تاريخه وإلا سيضطر الطالب لاتخــاذ الاجراءات القانونية وتوجيه اتهام التبديد وخيانة الأمانة المنصوص عليها قانونا مع حق المنذر في المطالبة بالتعويض المدني الجابر للضرر مع حفظ كافة الحقوق القانونية الأخرى للمنذر.
-            </div>
+            <div class="p-text">انا المحضر سالف الذكر قد انتقلت حيث إقامة المنذر اليه وأنذرته بسداد المبــلغ المذكور للطالب في غضون أسبوع من تاريخه وإلا سيضطر الطالب لاتخــاذ الاجراءات القانونية وتوجيه اتهام التبديد وخيانة الأمانة المنصوص عليها قانونا مع حق المنذر في المطالبة بالتعويض المدني الجابر للضرر مع حفظ كافة الحقوق القانونية الأخرى للمنذر.</div>
         </div>
         <div>
-            <div class="marginalia">
-                وكيل الطالــــــــب<br>المحامـــي
-            </div>
-            <!-- ختم المحامي المخصص -->
-            <div class="lawyer-stamp">
-                <span id="pLawyerStamp"></span><br>المحامى<br><span id="pCourtStamp"></span>
-            </div>
+            <div class="marginalia">وكيل الطالــــــــب<br>المحامـــي</div>
+            <div class="lawyer-stamp"><span id="pLawyerStamp"></span><br>المحامى<br><span id="pCourtStamp"></span></div>
         </div>
     </div>
 </div>
 
 <script>
-// ⚠️ ضع رابط الـ Web App هنا
-const API_URL = "https://script.google.com/macros/s/AKfycbxMz2MRnAmA-YO_RxD6c6TIc56RSDBdDdXcAdGsBl3pSJTD9K5IQApc85OeQ26QyBvSKQ/exec"; 
-let allNotices = [];
+// ⚠️ ضع رابط الـ API الجديد هنا
+const API_URL = "https://script.google.com/macros/s/AKfycbwk-nLf9lbGhRr1Xmdr5OXieyTwu7Z_RnSR6AknkhGlpDJo-8BnBm-ZJgw3pVLAHHgw1w/exec";
+let allActions = [];
+let currentAction = null;
 
 window.onload = loadData;
 
 async function loadData() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">⏳ جاري التحميل...</td></tr>`;
     try {
         const res = await fetch(API_URL + "?module=legal");
-        allNotices = await res.json();
-        renderTable(allNotices);
+        allActions = await res.json();
+        renderTable(allActions);
+        calculateStats(allActions);
     } catch (e) {
-        document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center">يمكنك اختبار الواجهة وإضافة إنذار محلياً لحين ربط الـ API.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="color:red;text-align:center">❌ خطأ في الاتصال بالخادم.</td></tr>`;
     }
+}
+
+function calculateStats(data) {
+    let warnings = 0, followups = 0, totalAmount = 0;
+    data.forEach(d => {
+        if(d.type === 'إنذار' && !d.status.includes('تصالح')) warnings++;
+        if(d.type === 'متابعة' && !d.status.includes('تصالح')) followups++;
+        if(!d.status.includes('تصالح')) totalAmount += Number(d.amount) || 0;
+    });
+    document.getElementById('stTotal').innerText = data.length;
+    document.getElementById('stWarnings').innerText = warnings;
+    document.getElementById('stFollowups').innerText = followups;
+    document.getElementById('stAmount').innerText = totalAmount.toLocaleString() + ' ج.م';
 }
 
 function renderTable(data) {
     const tbody = document.getElementById('tableBody');
-    if(!data.length){ tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">لا توجد إنذارات.</td></tr>`; return; }
-    tbody.innerHTML = data.map(n => `
-      <tr>
-        <td style="font-weight:bold;color:var(--secondary)">${n.id}</td>
-        <td>${n.applicant}</td><td>${n.defendant}</td>
-        <td style="font-weight:bold">${n.amount} ج.م</td><td>${n.lawyer.split('|')[0]}</td>
-        <td>${n.date}</td>
-        <td><button class="btn btn-sec btn-sm" onclick="printExistingNotice('${n.id}')">🖨️ طباعة</button></td>
-      </tr>
-    `).join('');
+    if(!data.length){ tbody.innerHTML = `<tr><td colspan="8" style="text-align:center">لا توجد بيانات.</td></tr>`; return; }
+    tbody.innerHTML = data.map(a => {
+        const bg = a.type === 'إنذار' ? '#9f1239' : '#0ea5e9';
+        const stBg = a.status.includes('تصالح') ? '#10b981' : '#f59e0b';
+        return `<tr onclick="openDetails('${a.id}')">
+            <td style="font-weight:bold;color:var(--primary)">${a.id}</td>
+            <td><span class="badge" style="background:${bg}">${a.type}</span></td>
+            <td style="font-weight:bold">${a.defendant}</td>
+            <td style="color:var(--primary);font-weight:bold">${a.amount}</td>
+            <td>${a.lawyer ? a.lawyer.split('|')[0] : 'إدارة التحصيل'}</td>
+            <td style="font-size:12px;color:#666">${a.date}</td>
+            <td style="font-size:12px;font-weight:bold;color:var(--secondary)">${a.next_date || '-'}</td>
+            <td><span class="badge" style="background:${stBg}">${a.status}</span></td>
+        </tr>`;
+    }).join('');
 }
 
 function filterTable() {
     const term = document.getElementById('searchInput').value.toLowerCase();
-    renderTable(allNotices.filter(n => n.id.toLowerCase().includes(term) || n.defendant.toLowerCase().includes(term)));
+    const typeVal = document.getElementById('typeFilter').value;
+    const filtered = allActions.filter(a => 
+        (a.id.toLowerCase().includes(term) || a.defendant.toLowerCase().includes(term) || (a.lawyer && a.lawyer.includes(term))) &&
+        (!typeVal || a.type === typeVal)
+    );
+    renderTable(filtered);
 }
 
-function openModal(id){ document.getElementById(id).style.display='flex'; }
+function toggleLegalFields() {
+    const isLegal = document.getElementById('nType').value === 'إنذار';
+    document.querySelectorAll('.legal-only').forEach(el => el.style.display = isLegal ? 'block' : 'none');
+}
+
+function openModal(id){ document.getElementById(id).style.display='flex'; if(id==='newNoticeModal') toggleLegalFields(); }
 function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'); }
 
-async function saveNotice() {
-    const applicant = document.getElementById('nApplicant').value;
-    const defendant = document.getElementById('nDefendant').value;
-    const amount = document.getElementById('nAmount').value;
-    const lawyerVal = document.getElementById('nLawyer').value;
-    
-    if(!applicant || !defendant || !amount) return alert("أكمل الحقول المطلوبة!");
+async function saveAction() {
+    if(!nDefendant.value || !nAmount.value) return alert("يرجى كتابة اسم العميل والمبلغ!");
+    const btn = document.getElementById('btnSave'); btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
 
-    const btn = document.getElementById('btnSave');
-    btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
-
-    const newNotice = {
-        id: "LGL-" + Math.floor(Math.random() * 100000),
-        applicant: applicant,
-        appAddress: document.getElementById('nAppAddress').value,
-        defendant: defendant,
-        defAddress: document.getElementById('nDefAddress').value,
-        amount: amount,
-        amountText: document.getElementById('nAmountText').value,
-        lawyer: lawyerVal,
-        date: new Date().toLocaleDateString('ar-EG')
+    const isLegal = document.getElementById('nType').value === 'إنذار';
+    const payload = {
+        module: "legal", action: "create",
+        data: {
+            type: document.getElementById('nType').value,
+            defendant: nDefendant.value, defAddress: isLegal ? nDefAddress.value : '',
+            amount: nAmount.value, amountText: isLegal ? nAmountText.value : '',
+            lawyer: isLegal ? nLawyer.value : '', applicant: isLegal ? nApplicant.value : '',
+            next_date: nNextDate.value, notes: nNotes.value
+        }
     };
 
-    try {
-        await fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({module:"legal", action:"create", data: newNotice}) 
-        });
-    } catch (e) {
-        console.log("Saving locally for preview");
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const result = await res.json();
+    
+    closeModals(); btn.disabled = false; btn.innerText = "💾 حفظ الإجراء";
+    ['nDefendant','nDefAddress','nAmount','nAmountText','nNextDate','nNotes'].forEach(id=>document.getElementById(id).value='');
+    
+    if(isLegal && confirm("تم حفظ الإنذار بنجاح! هل تريد طباعة النموذج الرسمي الآن؟")) {
+        // تجهيز بيانات الطباعة من الـ payload
+        currentAction = { ...payload.data, id: result.id, date: new Date().toLocaleDateString('ar-EG') };
+        printNotice();
     }
-
-    allNotices.unshift(newNotice);
-    renderTable(allNotices);
-    
-    closeModals(); 
-    btn.disabled = false; btn.innerText = "💾 حفظ وطباعة الإنذار";
-    
-    // إرسال البيانات للطباعة
-    triggerPrint(newNotice);
+    loadData();
 }
 
-function printExistingNotice(id) {
-    const notice = allNotices.find(n => n.id === id);
-    if(notice) triggerPrint(notice);
+function openDetails(id){
+    currentAction = allActions.find(a => a.id === id);
+    if(!currentAction) return;
+
+    document.getElementById('uId').value = currentAction.id;
+    document.getElementById('uStatus').value = currentAction.status;
+    document.getElementById('uNextDate').value = currentAction.next_date || '';
+    document.getElementById('uNotes').value = currentAction.notes || '';
+
+    // إخفاء زر الطباعة إذا كان متابعة عادية
+    document.getElementById('btnPrintBtn').style.display = currentAction.type === 'إنذار' ? 'block' : 'none';
+
+    document.getElementById('detailsHeader').innerHTML = `
+        <strong>المعرف:</strong> ${currentAction.id} | <strong>النوع:</strong> ${currentAction.type}<br>
+        <strong>العميل:</strong> ${currentAction.defendant} | <strong>المبلغ:</strong> ${currentAction.amount} ج.م<br>
+        <strong>المحامي/المتابع:</strong> ${currentAction.lawyer ? currentAction.lawyer.split('|')[0] : 'إدارة المحل'}<br>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #ccc"><strong>آخر ملاحظة:</strong> ${currentAction.notes || 'لا يوجد'}</div>
+    `;
+    openModal('detailsModal');
 }
 
-function triggerPrint(notice) {
-    const lawyerData = notice.lawyer.split('|');
-    const lawyerName = lawyerData[0];
-    const courtName = lawyerData[1];
+async function updateAction() {
+    const btn = document.getElementById('btnUpdate'); btn.disabled = true; btn.innerText = "⏳ جاري التحديث...";
+    const payload = {
+        module: "legal", action: "update",
+        data: {
+            id: document.getElementById('uId').value, status: document.getElementById('uStatus').value,
+            next_date: document.getElementById('uNextDate').value, notes: document.getElementById('uNotes').value
+        }
+    };
+    await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+    closeModals(); btn.disabled = false; btn.innerText = "🚀 حفظ التحديث"; loadData();
+}
 
-    document.getElementById('pApplicant').innerText = notice.applicant;
-    document.getElementById('pApplicant2').innerText = notice.applicant;
-    document.getElementById('pAppAddress').innerText = notice.appAddress;
-    document.getElementById('pDefendant').innerText = notice.defendant;
-    document.getElementById('pDefAddress').innerText = notice.defAddress;
-    document.getElementById('pAmount').innerText = notice.amount;
-    document.getElementById('pAmountText').innerText = notice.amountText;
-    document.getElementById('pLawyer').innerText = lawyerName;
-    document.getElementById('pCourt').innerText = courtName;
+function printNotice() {
+    if(!currentAction || currentAction.type !== 'إنذار') return;
+    const lawyerData = currentAction.lawyer.split('|');
     
-    // الختم
-    document.getElementById('pLawyerStamp').innerText = lawyerName;
-    document.getElementById('pCourtStamp').innerText = courtName;
+    document.getElementById('pApplicant').innerText = currentAction.applicant;
+    document.getElementById('pApplicant2').innerText = currentAction.applicant;
+    document.getElementById('pDefendant').innerText = currentAction.defendant;
+    document.getElementById('pDefAddress').innerText = currentAction.defAddress;
+    document.getElementById('pAmount').innerText = currentAction.amount;
+    document.getElementById('pAmountText').innerText = currentAction.amountText;
+    document.getElementById('pLawyer').innerText = lawyerData[0];
+    document.getElementById('pCourt').innerText = lawyerData[1] || 'جهينة الجزئية';
+    document.getElementById('pLawyerStamp').innerText = lawyerData[0];
+    document.getElementById('pCourtStamp').innerText = lawyerData[1] || 'جهينة الجزئية';
 
     window.print();
 }
